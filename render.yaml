@@ -1,0 +1,48 @@
+# Render Blueprint - Clara Full Stack Deployment
+# https://render.com/docs/blueprint-spec
+
+services:
+  # ============================================
+  # BACKEND - Python FastAPI
+  # ============================================
+  - type: web
+    name: clara-backend
+    runtime: python
+    region: frankfurt
+    plan: free
+    rootDir: py_backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+    healthCheckPath: /health
+    autoDeploy: true
+
+  # ============================================
+  # FRONTEND - React/Vite Static Site
+  # ============================================
+  - type: web
+    name: clara-frontend
+    runtime: static
+    region: frankfurt
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: VITE_API_URL
+        fromService:
+          name: clara-backend
+          type: web
+          property: host
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    autoDeploy: true
