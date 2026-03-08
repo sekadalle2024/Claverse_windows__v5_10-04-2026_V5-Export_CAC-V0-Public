@@ -2893,10 +2893,39 @@ const DemarrerMenu: React.FC<DemarrerMenuProps> = ({ onInsertCommand, disabled =
     }
   };
 
+  /**
+   * Convertit une commande au format normal en format liste à puces
+   * Exemple: "[Command] = Couverture" devient "- [Command] = Couverture"
+   */
+  const formatCommandWithBullets = (command: string): string => {
+    // Diviser la commande en lignes
+    const lines = command.split('\n');
+    
+    // Ajouter un tiret devant chaque ligne non vide qui commence par '['
+    const formattedLines = lines.map(line => {
+      const trimmedLine = line.trim();
+      // Si la ligne commence par '[' et n'a pas déjà un tiret, ajouter le tiret
+      if (trimmedLine.startsWith('[') && !trimmedLine.startsWith('- [')) {
+        return `- ${trimmedLine}`;
+      }
+      // Si la ligne est vide, la garder telle quelle
+      if (trimmedLine === '') {
+        return line;
+      }
+      // Pour les autres lignes (comme les objets JSON), les garder telles quelles
+      return line;
+    });
+    
+    return formattedLines.join('\n');
+  };
+
   const handleModeClick = (mode: ModeItem) => {
     if (activeEtape) {
       // Si le mode a sa propre commande, l'utiliser, sinon utiliser l'ancienne logique
-      const finalCommand = mode.command || (mode.prefix && activeEtape.command ? mode.prefix + activeEtape.command : activeEtape.command || '');
+      const rawCommand = mode.command || (mode.prefix && activeEtape.command ? mode.prefix + activeEtape.command : activeEtape.command || '');
+      
+      // Formater la commande avec des listes à puces
+      const finalCommand = formatCommandWithBullets(rawCommand);
       
       try {
         onInsertCommand(finalCommand);

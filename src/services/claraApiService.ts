@@ -35,7 +35,7 @@ export class ClaraApiService {
   //private n8nEndpoint = "http://localhost:5678/webhook/template";
   //private n8nEndpoint = "https://barow52161.app.n8n.cloud/webhook/integration";
    // private n8nEndpoint = "https://fetanif511.app.n8n.cloud/webhook-test/integration";
-    private n8nEndpoint = "https://fetanif511.app.n8n.cloud/webhook/integration";
+    private n8nEndpoint = "http://localhost:5678/webhook/template";
     //private n8nEndpoint = http://localhost:5678/webhook/htlm_processor"";
   //  private n8nEndpoint = "http://localhost:5678/webhook/table";
    //private n8nEndpoint = "http://localhost:5678/webhook/json";
