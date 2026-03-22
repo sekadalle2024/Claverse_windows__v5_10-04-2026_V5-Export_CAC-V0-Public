@@ -1,5 +1,5 @@
 # Script de Demarrage Claraverse - Backend + Frontend
-# Version: 1.0.0
+# Version: 2.0.0 - Avec support Conda
 
 Write-Host "========================================================================" -ForegroundColor Cyan
 Write-Host "DEMARRAGE CLARAVERSE - Backend Python + Frontend React" -ForegroundColor Cyan
@@ -7,22 +7,47 @@ Write-Host "====================================================================
 Write-Host ""
 
 # Configuration
+$ENV_NAME = "claraverse_backend"
 $BACKEND_DIR = "py_backend"
 $BACKEND_PORT = 5000
 $FRONTEND_PORT = 5173
+$USE_CONDA = $false
 
 # Verifications
 Write-Host "Verifications prealables..." -ForegroundColor Yellow
 Write-Host ""
 
-# Verifier Python
-Write-Host "Verification de Python..." -NoNewline
+# Verifier conda
+Write-Host "Verification de conda..." -NoNewline
 try {
-    $pythonVersion = & python --version 2>&1
-    Write-Host " OK $pythonVersion" -ForegroundColor Green
+    $condaVersion = & conda --version 2>&1
+    Write-Host " OK $condaVersion" -ForegroundColor Green
+    
+    # Verifier si l'environnement conda existe
+    $envExists = conda env list | Select-String -Pattern $ENV_NAME -Quiet
+    if ($envExists) {
+        Write-Host "Environnement conda '$ENV_NAME' detecte - Utilisation de conda" -ForegroundColor Green
+        $USE_CONDA = $true
+    } else {
+        Write-Host "Environnement conda '$ENV_NAME' non trouve - Utilisation de Python systeme" -ForegroundColor Yellow
+    }
 } catch {
-    Write-Host " ERREUR Python non trouve!" -ForegroundColor Red
-    exit 1
+    Write-Host " Non installe - Utilisation de Python systeme" -ForegroundColor Yellow
+}
+
+# Verifier Python (si pas conda)
+if (-not $USE_CONDA) {
+    Write-Host "Verification de Python..." -NoNewline
+    try {
+        $pythonVersion = & python --version 2>&1
+        Write-Host " OK $pythonVersion" -ForegroundColor Green
+    } catch {
+        Write-Host " ERREUR Python non trouve!" -ForegroundColor Red
+        Write-Host ""
+        Write-Host "Installez Python ou creez l'environnement conda:" -ForegroundColor Yellow
+        Write-Host "   .\setup-backend-env.ps1" -ForegroundColor White
+        exit 1
+    }
 }
 
 # Verifier Node.js
@@ -50,23 +75,35 @@ Write-Host "Toutes les verifications sont passees!" -ForegroundColor Green
 Write-Host ""
 
 # Demarrage Backend
-Write-Host "Demarrage du Backend Python..." -ForegroundColor Yellow
+if ($USE_CONDA) {
+    Write-Host "Demarrage du Backend Python (conda env: $ENV_NAME)..." -ForegroundColor Yellow
+} else {
+    Write-Host "Demarrage du Backend Python..." -ForegroundColor Yellow
+}
 Write-Host "   Dossier: $BACKEND_DIR" -ForegroundColor Gray
 Write-Host "   Port: $BACKEND_PORT" -ForegroundColor Gray
 Write-Host ""
 
-$backendJob = Start-Job -ScriptBlock {
-    param($dir)
-    Set-Location $dir
-    python main.py
-} -ArgumentList (Resolve-Path $BACKEND_DIR)
+if ($USE_CONDA) {
+    $backendJob = Start-Job -ScriptBlock {
+        param($envName, $dir)
+        Set-Location $dir
+        & conda run -n $envName python main.py
+    } -ArgumentList $ENV_NAME, (Resolve-Path $BACKEND_DIR)
+} else {
+    $backendJob = Start-Job -ScriptBlock {
+        param($dir)
+        Set-Location $dir
+        & python main.py
+    } -ArgumentList (Resolve-Path $BACKEND_DIR)
+}
 
 Write-Host "Backend demarre (Job ID: $($backendJob.Id))" -ForegroundColor Green
 Write-Host ""
 
 # Attendre le backend
-Write-Host "Attente du demarrage du backend (5 secondes)..." -ForegroundColor Yellow
-Start-Sleep -Seconds 5
+Write-Host "Attente du demarrage du backend (10 secondes)..." -ForegroundColor Yellow
+Start-Sleep -Seconds 10
 
 # Verifier le backend
 Write-Host "Verification du backend..." -NoNewline
@@ -101,7 +138,11 @@ Write-Host ""
 
 Write-Host "SERVICES ACTIFS:" -ForegroundColor Green
 Write-Host ""
-Write-Host "   Backend Python" -ForegroundColor Yellow
+if ($USE_CONDA) {
+    Write-Host "   Backend Python (Conda: $ENV_NAME)" -ForegroundColor Yellow
+} else {
+    Write-Host "   Backend Python" -ForegroundColor Yellow
+}
 Write-Host "      URL: http://127.0.0.1:$BACKEND_PORT" -ForegroundColor White
 Write-Host "      Job ID: $($backendJob.Id)" -ForegroundColor Gray
 Write-Host ""

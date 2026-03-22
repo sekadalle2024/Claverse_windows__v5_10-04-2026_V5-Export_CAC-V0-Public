@@ -7192,6 +7192,16 @@
     clearHideTimeout() { if (this.hideTimeout) { clearTimeout(this.hideTimeout); this.hideTimeout = null; } this.clearHoverTimeout(); }
 
     isTableInChat(table) {
+      // Détection spécifique pour les tables Lead Balance
+      if (table.classList.contains('lead-table') || 
+          table.classList.contains('lead-balance-table') ||
+          table.closest('.lead-syscohada-container') ||
+          table.closest('.lead-balance-results') ||
+          table.closest('.lead-balance-accordion')) {
+        return true;
+      }
+      
+      // Détection standard
       if (table.matches("table.min-w-full.border.border-gray-200.dark\\:border-gray-700.rounded-lg") && table.closest("div.prose.prose-base.dark\\:prose-invert.max-w-none")) return true;
       const selectors = ['[class*="chat"]', '[class*="message"]', '[class*="conversation"]', '[id*="chat"]', ".prose", ".markdown-body", '[class*="assistant"]', "[data-editable-processed]"];
       return selectors.some(s => table.closest(s));
