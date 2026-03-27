@@ -1,0 +1,193 @@
+================================================================================
+  COMMANDES RAPIDES - REDEPLOIEMENT NETLIFY
+  27 Mars 2026
+================================================================================
+
+🚀 DEPLOIEMENT EN UN CLIC
+========================
+
+À la racine du projet, double-cliquez sur :
+→ DEPLOYER_NETLIFY.bat
+
+Durée : 10-15 minutes
+Résultat : Site mis à jour automatiquement
+
+
+🔧 DEPLOIEMENT VIA POWERSHELL
+=============================
+
+Vérification rapide (30 secondes)
+---------------------------------
+cd deploiement-netlify
+.\verifier-avant-redeploiement.ps1
+
+
+Déploiement complet (10-15 minutes)
+-----------------------------------
+cd deploiement-netlify
+.\deploy.ps1 -Message "Mise à jour des modes et corrections - 27 Mars 2026"
+
+
+Déploiement rapide (3-5 minutes)
+--------------------------------
+cd deploiement-netlify
+.\deploy-rapide.ps1 -Message "Mise à jour rapide"
+
+
+Vérification des fichiers volumineux
+------------------------------------
+cd deploiement-netlify
+.\verifier-fichiers-volumineux.ps1
+
+
+Vérification de la configuration
+--------------------------------
+cd deploiement-netlify
+.\verifier-config.ps1
+
+
+📊 INFORMATIONS UTILES
+======================
+
+Site Production
+---------------
+https://prclaravi.netlify.app
+
+Dashboard Netlify
+-----------------
+https://app.netlify.com/projects/prclaravi
+
+Logs de déploiement
+-------------------
+netlify logs
+
+Statut du projet
+----------------
+netlify status
+
+Authentification
+----------------
+netlify login
+
+
+🔍 DÉPANNAGE RAPIDE
+===================
+
+Vérifier Node.js
+----------------
+node --version
+
+Vérifier npm
+-----------
+npm --version
+
+Vérifier Netlify CLI
+--------------------
+netlify --version
+
+Vérifier l'authentification
+---------------------------
+netlify status
+
+Vérifier le build local
+-----------------------
+npm run build
+
+Vérifier les erreurs de build
+-----------------------------
+npm run build 2>&1 | Select-String "error"
+
+Vider le cache du navigateur
+----------------------------
+Ctrl + Shift + Del
+
+
+📁 FICHIERS IMPORTANTS
+======================
+
+Guide complet
+-------------
+GUIDE_REDEPLOIEMENT_COMPLET_27_MARS_2026.md
+
+Résumé des étapes
+-----------------
+00_REDEPLOIEMENT_NETLIFY_27_MARS_2026.txt
+
+Scripts de déploiement
+---------------------
+deploiement-netlify/deploy.ps1
+deploiement-netlify/deploy-rapide.ps1
+deploiement-netlify/DEPLOYER_NETLIFY.bat
+
+Documentation
+-------------
+deploiement-netlify/GUIDE_UTILISATION.md
+deploiement-netlify/MEMO_PROBLEMES_SOLUTIONS.md
+deploiement-netlify/COMMANDES_UTILES.md
+deploiement-netlify/HISTORIQUE_DEPLOIEMENTS.md
+
+
+⚡ WORKFLOW RECOMMANDÉ
+======================
+
+1. Vérifier la configuration
+   → .\verifier-avant-redeploiement.ps1
+
+2. Déployer
+   → .\deploy.ps1 -Message "Description des modifications"
+
+3. Vérifier le site
+   → https://prclaravi.netlify.app
+
+4. Tester les nouvelles fonctionnalités
+   → Vérifier les modes ajoutés
+
+5. Consulter l'historique
+   → deploiement-netlify/HISTORIQUE_DEPLOIEMENTS.md
+
+
+🎯 MODIFICATIONS DÉPLOYÉES
+==========================
+
+Nouveaux Modes
+--------------
+✓ Mode Synthèse Mission
+✓ Mode Analyse Variations
+✓ Mode E-Révision
+✓ Mode Suivi Recommandations
+✓ Mode Contrôles Comptes
+
+Améliorations
+-------------
+✓ Menu "Démarrer" réorganisé
+✓ Nouvelles fonctionnalités d'export
+✓ Corrections de détection de tables
+✓ Optimisations de performance
+
+
+📞 SUPPORT RAPIDE
+=================
+
+Problème : Build échoue
+Solution : npm run build
+
+Problème : Non authentifié
+Solution : netlify login
+
+Problème : Out of memory
+Solution : Redémarrer l'ordinateur
+
+Problème : Site ne se met pas à jour
+Solution : Vider le cache (Ctrl+Shift+Del)
+
+Problème : Déploiement lent
+Solution : Vérifier la connexion Internet
+
+
+================================================================================
+  BON DÉPLOIEMENT ! 🚀
+================================================================================
+
+Version : 1.0
+Date : 27 Mars 2026
+Statut : ✅ Prêt pour le déploiement

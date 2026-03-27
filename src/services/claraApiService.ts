@@ -1038,9 +1038,7 @@ export class ClaraApiService {
           content: initialContent,
           timestamp: new Date(),
           metadata: { 
-            model: "local",
-            type: "auto_trigger_upload",
-            trigger_type: "lead_balance"
+            model: "local"
           },
         };
       }
@@ -1065,9 +1063,7 @@ export class ClaraApiService {
           content: initialContent,
           timestamp: new Date(),
           metadata: { 
-            model: "local",
-            type: "auto_trigger_upload",
-            trigger_type: "etat_fin"
+            model: "local"
           },
         };
       }

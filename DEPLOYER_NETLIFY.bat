@@ -1,30 +1,30 @@
 @echo off
-setlocal
-echo ============================================================
-echo 🚀 CLARAVERSE - DEPLOIEMENT EN UN CLIC SUR NETLIFY
-echo ============================================================
-echo.
-echo Ce script va :
-echo 1. Nettoyer l'ancien build
-echo 2. Compiler la nouvelle version (production)
-echo 3. Envoyer les fichiers sur Netlify
-echo.
-echo Appuyez sur une touche pour commencer...
-pause > nul
+REM Script de deploiement Netlify en un clic
+REM Double-cliquez sur ce fichier pour deployer
 
-cd /d "%~dp0deploiement-netlify"
-powershell -ExecutionPolicy Bypass -File .\deploy.ps1 -Message "Mise a jour manuelle (One-Click)"
+setlocal enabledelayedexpansion
 
-if %ERRORLEVEL% equ 0 (
-    echo.
-    echo ✅ DEPLOIEMENT TERMINE AVEC SUCCES !
-    echo Votre site est a jour.
-) else (
-    echo.
-    echo ❌ UNE ERREUR EST SURVENUE DURANT LE DEPLOIEMENT.
-    echo Veuillez verifier la connexion internet et l'authentification Netlify.
+echo.
+echo ========================================
+echo   DEPLOIEMENT NETLIFY - CLARAVERSE
+echo ========================================
+echo.
+
+REM Vérifier que PowerShell est disponible
+where powershell >nul 2>&1
+if errorlevel 1 (
+    echo ERREUR: PowerShell n'est pas disponible
+    pause
+    exit /b 1
 )
 
-echo.
-echo Appuyez sur une touche pour fermer cette fenetre...
-pause > nul
+REM Aller dans le dossier deploiement-netlify
+cd deploiement-netlify
+
+REM Exécuter le script de déploiement
+powershell -NoProfile -ExecutionPolicy Bypass -File "deploy.ps1" -Message "Redeploiement - %date% %time%"
+
+REM Pause pour voir le résultat
+pause
+
+exit /b %errorlevel%
