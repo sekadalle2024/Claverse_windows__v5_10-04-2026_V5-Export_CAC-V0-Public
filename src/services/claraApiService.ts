@@ -644,7 +644,7 @@ export class ClaraApiService {
       return md + "\n\n";
     }
     
-    // Tables 2+ (index > 0) : Format 1 colonne avec en-tête en gras
+    // Tables 2+ (index > 0) : Format 1 colonne avec en-tête en HTML
     // Extraire la clé et la valeur (généralement une seule paire)
     if (entries.length === 1) {
       const [key, value] = entries[0];
@@ -658,15 +658,17 @@ export class ClaraApiService {
         .replace(/\n/g, '\n\n') // Convertir les sauts de ligne en double saut pour le markdown
         .trim();
       
-      // Format Markdown avec titre de niveau 3 (mieux supporté que le gras)
-      let md = `\n### ${headerText}\n\n`;
-      md += `${cellValue}\n\n`;
+      // SOLUTION FINALE: Utiliser un tableau Markdown 1 colonne avec en-tête en gras
+      // Cette approche garantit un rendu cohérent avec la table 1
+      let md = `\n| **${headerText}** |\n`;
+      md += `|${'-'.repeat(headerText.length + 6)}|\n`;
+      md += `| ${cellValue.replace(/\n\n/g, '<br><br>')} |\n\n`;
       
-      console.log(`✅ Table ${tableIndex + 1} générée:`, {
+      console.log(`✅ Table ${tableIndex + 1} générée (Tableau Markdown):`, {
         header: headerText,
         contentLength: cellValue.length,
         markdownLength: md.length,
-        preview: md.substring(0, 100),
+        preview: md.substring(0, 150),
       });
       
       return md;
