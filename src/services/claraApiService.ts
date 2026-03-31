@@ -1230,6 +1230,43 @@ export class ClaraApiService {
     // ========================================================================
     // FORMAT 4: NOUVEAU FORMAT "Programme de travail" avec structure "data"
     // ========================================================================
+    
+    // CAS 4A: Objet direct avec propriété "data" (n8n retourne un objet au lieu d'un array)
+    if (result && typeof result === "object" && !Array.isArray(result) && "data" in result) {
+      console.log(
+        '✅ FORMAT 4A DETECTE: Objet direct avec propriété "data" (webhook n8n)',
+      );
+
+      const dataContent = result.data;
+      console.log("📊 Contenu de data:", {
+        type: typeof dataContent,
+        keys: dataContent && typeof dataContent === "object" ? Object.keys(dataContent) : [],
+        firstKey: dataContent && typeof dataContent === "object" ? Object.keys(dataContent)[0] : null,
+      });
+
+      // Convertir les données structurées en Markdown
+      console.log("🔄 Début de la conversion en Markdown...");
+      contentToDisplay = this.convertStructuredDataToMarkdown(dataContent);
+      console.log(
+        `✅ Conversion terminée: ${contentToDisplay.length} caractères générés`,
+      );
+
+      metadata = {
+        format: "programme_travail_data_object",
+        timestamp: new Date().toISOString(),
+        dataStructure: dataContent && typeof dataContent === "object" ? Object.keys(dataContent)[0] || "unknown" : "unknown",
+        contentLength: contentToDisplay.length,
+      };
+
+      console.log("🔍 === FIN ANALYSE (FORMAT 4A - Programme de travail objet) ===");
+      console.log(
+        "📝 Aperçu du contenu généré:",
+        contentToDisplay.substring(0, 300),
+      );
+      return { content: contentToDisplay, metadata };
+    }
+    
+    // CAS 4B: Array avec objet contenant "data" (format original)
     if (Array.isArray(result) && result.length > 0) {
       const firstItem = result[0];
 
@@ -1243,7 +1280,7 @@ export class ClaraApiService {
       // Vérifier si c'est le nouveau format avec "data"
       if (firstItem && typeof firstItem === "object" && "data" in firstItem) {
         console.log(
-          '✅ FORMAT 4 DETECTE: Nouveau format "Programme de travail" avec structure data',
+          '✅ FORMAT 4B DETECTE: Array avec objet contenant "data"',
         );
 
         const dataContent = firstItem.data;
@@ -1261,14 +1298,14 @@ export class ClaraApiService {
         );
 
         metadata = {
-          format: "programme_travail_data",
+          format: "programme_travail_data_array",
           timestamp: new Date().toISOString(),
           totalItems: result.length,
           dataStructure: Object.keys(dataContent)[0] || "unknown",
           contentLength: contentToDisplay.length,
         };
 
-        console.log("🔍 === FIN ANALYSE (FORMAT 4 - Programme de travail) ===");
+        console.log("🔍 === FIN ANALYSE (FORMAT 4B - Programme de travail array) ===");
         console.log(
           "📝 Aperçu du contenu généré:",
           contentToDisplay.substring(0, 300),
