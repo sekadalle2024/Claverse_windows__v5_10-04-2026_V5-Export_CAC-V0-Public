@@ -1,4 +1,4 @@
-﻿// Menu contextuel (Core) pour les tables ClaraVerse
+﻿﻿// Menu contextuel (Core) pour les tables ClaraVerse
 // Version 9.3 - Export Word via backend Python + fallback JS
 
 (function () {
@@ -1956,6 +1956,167 @@
       return null;
     }
     
+    /**
+     * Convertit une valeur (alphabetique ou numerique) vers format numerique 3 niveaux
+     * Utilise pour conversion INTEGRALE des matrices
+     */
+    convertToNumeric3(value) {
+      if (!value) return null;
+      const v = String(value).trim().toLowerCase();
+      
+      const num = parseFloat(v);
+      if (!isNaN(num) && num >= 1 && num <= 3) return Math.round(num);
+      
+      if (v.includes('faible') || v.includes('low') || v === 'f') return 1;
+      if (v.includes('moyen') || v.includes('medium') || v === 'm') return 2;
+      if ((v.includes('eleve') || v.includes('élevé') || v.includes('high') || v === 'e') && !v.includes('tres')) return 3;
+      
+      if (v.includes('tres faible') || v.includes('très faible')) return 1;
+      if (v.includes('modere') || v.includes('modéré')) return 2;
+      if (v.includes('tres eleve') || v.includes('très élevé')) return 3;
+      
+      if (v.includes('mineur')) return 1;
+      if (v.includes('significatif')) return 2;
+      if (v.includes('majeur') || v.includes('critique')) return 3;
+      
+      return null;
+    }
+    
+    convertToNumeric4(value) {
+      if (!value) return null;
+      const v = String(value).trim().toLowerCase();
+      
+      const num = parseFloat(v);
+      if (!isNaN(num) && num >= 1 && num <= 4) return Math.round(num);
+      
+      if (v.includes('mineur')) return 1;
+      if (v.includes('significatif')) return 2;
+      if (v.includes('majeur')) return 3;
+      if (v.includes('critique')) return 4;
+      
+      if (v.includes('faible') || v.includes('low')) return 1;
+      if (v.includes('moyen') || v.includes('medium')) return 2;
+      if ((v.includes('eleve') || v.includes('élevé') || v.includes('high')) && !v.includes('tres')) return 3;
+      
+      if (v.includes('tres faible') || v.includes('très faible')) return 1;
+      if (v.includes('modere') || v.includes('modéré')) return 2;
+      if (v.includes('tres eleve') || v.includes('très élevé')) return 4;
+      
+      return null;
+    }
+    
+    convertToNumeric5(value) {
+      if (!value) return null;
+      const v = String(value).trim().toLowerCase();
+      
+      const num = parseFloat(v);
+      if (!isNaN(num) && num >= 1 && num <= 5) return Math.round(num);
+      
+      if (v.includes('tres faible') || v.includes('très faible')) return 1;
+      if (v.includes('faible') && !v.includes('tres')) return 2;
+      if (v.includes('modere') || v.includes('modéré')) return 3;
+      if (v.includes('eleve') && !v.includes('tres')) return 4;
+      if (v.includes('tres eleve') || v.includes('très élevé')) return 5;
+      
+      if (v.includes('faible') || v.includes('low')) return 2;
+      if (v.includes('moyen') || v.includes('medium')) return 3;
+      if (v.includes('high')) return 4;
+      
+      if (v.includes('mineur')) return 1;
+      if (v.includes('significatif')) return 2;
+      if (v.includes('majeur')) return 4;
+      if (v.includes('critique')) return 5;
+      
+      return null;
+    }
+    
+    convertToAlpha3(value) {
+      if (!value) return null;
+      const v = String(value).trim().toLowerCase();
+      
+      if (v.includes('faible') && !v.includes('tres')) return 'Faible';
+      if (v.includes('moyen') || v.includes('medium')) return 'Moyen';
+      if ((v.includes('eleve') || v.includes('élevé')) && !v.includes('tres')) return 'Élevé';
+      
+      const num = parseFloat(v);
+      if (!isNaN(num)) {
+        if (num === 1) return 'Faible';
+        if (num === 2) return 'Moyen';
+        if (num === 3) return 'Élevé';
+        if (num <= 2) return 'Faible';
+        if (num >= 4) return 'Élevé';
+      }
+      
+      if (v.includes('tres faible') || v.includes('très faible')) return 'Faible';
+      if (v.includes('modere') || v.includes('modéré')) return 'Moyen';
+      if (v.includes('tres eleve') || v.includes('très élevé')) return 'Élevé';
+      
+      if (v.includes('mineur')) return 'Faible';
+      if (v.includes('significatif')) return 'Moyen';
+      if (v.includes('majeur') || v.includes('critique')) return 'Élevé';
+      
+      return null;
+    }
+    
+    convertToAlpha4(value) {
+      if (!value) return null;
+      const v = String(value).trim().toLowerCase();
+      
+      if (v.includes('mineur')) return 'Mineur';
+      if (v.includes('significatif')) return 'Significatif';
+      if (v.includes('majeur') && !v.includes('critique')) return 'Majeur';
+      if (v.includes('critique')) return 'Critique';
+      
+      const num = parseFloat(v);
+      if (!isNaN(num)) {
+        if (num === 1) return 'Mineur';
+        if (num === 2) return 'Significatif';
+        if (num === 3) return 'Majeur';
+        if (num >= 4) return 'Critique';
+      }
+      
+      if (v.includes('faible') && !v.includes('tres')) return 'Mineur';
+      if (v.includes('moyen')) return 'Significatif';
+      if ((v.includes('eleve') || v.includes('élevé')) && !v.includes('tres')) return 'Majeur';
+      
+      if (v.includes('tres faible') || v.includes('très faible')) return 'Mineur';
+      if (v.includes('modere') || v.includes('modéré')) return 'Significatif';
+      if (v.includes('tres eleve') || v.includes('très élevé')) return 'Critique';
+      
+      return null;
+    }
+    
+    convertToAlpha5(value) {
+      if (!value) return null;
+      const v = String(value).trim().toLowerCase();
+      
+      if (v.includes('tres faible') || v.includes('très faible')) return 'Très faible';
+      if (v.includes('faible') && !v.includes('tres')) return 'Faible';
+      if (v.includes('modere') || v.includes('modéré')) return 'Modéré';
+      if (v.includes('eleve') && !v.includes('tres')) return 'Élevé';
+      if (v.includes('tres eleve') || v.includes('très élevé')) return 'Très élevé';
+      
+      const num = parseFloat(v);
+      if (!isNaN(num)) {
+        if (num === 1) return 'Très faible';
+        if (num === 2) return 'Faible';
+        if (num === 3) return 'Modéré';
+        if (num === 4) return 'Élevé';
+        if (num === 5) return 'Très élevé';
+      }
+      
+      if (v.includes('faible') && !v.includes('tres')) return 'Faible';
+      if (v.includes('moyen')) return 'Modéré';
+      if ((v.includes('eleve') || v.includes('élevé')) && !v.includes('tres')) return 'Élevé';
+      
+      if (v.includes('mineur')) return 'Très faible';
+      if (v.includes('significatif')) return 'Faible';
+      if (v.includes('majeur')) return 'Élevé';
+      if (v.includes('critique')) return 'Très élevé';
+      
+      return null;
+    }
+    
     // ============================================================================
     // COULEURS POUR LES MATRICES
     // ============================================================================
@@ -1970,6 +2131,170 @@
         'Eleve': { bg: '#dc3545', text: '#ffffff' }     // Rouge
       };
     }
+    /**
+         * Convertit une valeur (alphabetique ou numerique) vers format numerique 3 niveaux
+         * Utilise pour conversion INTEGRALE des matrices
+         */
+        convertToNumeric3(value) {
+          if (!value) return null;
+          const v = String(value).trim().toLowerCase();
+
+          const num = parseFloat(v);
+          if (!isNaN(num) && num >= 1 && num <= 3) return Math.round(num);
+
+          if (v.includes('faible') || v.includes('low') || v === 'f') return 1;
+          if (v.includes('moyen') || v.includes('medium') || v === 'm') return 2;
+          if ((v.includes('eleve') || v.includes('élevé') || v.includes('high') || v === 'e') && !v.includes('tres')) return 3;
+
+          if (v.includes('tres faible') || v.includes('très faible')) return 1;
+          if (v.includes('modere') || v.includes('modéré')) return 2;
+          if (v.includes('tres eleve') || v.includes('très élevé')) return 3;
+
+          if (v.includes('mineur')) return 1;
+          if (v.includes('significatif')) return 2;
+          if (v.includes('majeur') || v.includes('critique')) return 3;
+
+          return null;
+        }
+
+        convertToNumeric4(value) {
+          if (!value) return null;
+          const v = String(value).trim().toLowerCase();
+
+          const num = parseFloat(v);
+          if (!isNaN(num) && num >= 1 && num <= 4) return Math.round(num);
+
+          if (v.includes('mineur')) return 1;
+          if (v.includes('significatif')) return 2;
+          if (v.includes('majeur')) return 3;
+          if (v.includes('critique')) return 4;
+
+          if (v.includes('faible') || v.includes('low')) return 1;
+          if (v.includes('moyen') || v.includes('medium')) return 2;
+          if ((v.includes('eleve') || v.includes('élevé') || v.includes('high')) && !v.includes('tres')) return 3;
+
+          if (v.includes('tres faible') || v.includes('très faible')) return 1;
+          if (v.includes('modere') || v.includes('modéré')) return 2;
+          if (v.includes('tres eleve') || v.includes('très élevé')) return 4;
+
+          return null;
+        }
+
+        convertToNumeric5(value) {
+          if (!value) return null;
+          const v = String(value).trim().toLowerCase();
+
+          const num = parseFloat(v);
+          if (!isNaN(num) && num >= 1 && num <= 5) return Math.round(num);
+
+          if (v.includes('tres faible') || v.includes('très faible')) return 1;
+          if (v.includes('faible') && !v.includes('tres')) return 2;
+          if (v.includes('modere') || v.includes('modéré')) return 3;
+          if (v.includes('eleve') && !v.includes('tres')) return 4;
+          if (v.includes('tres eleve') || v.includes('très élevé')) return 5;
+
+          if (v.includes('faible') || v.includes('low')) return 2;
+          if (v.includes('moyen') || v.includes('medium')) return 3;
+          if (v.includes('high')) return 4;
+
+          if (v.includes('mineur')) return 1;
+          if (v.includes('significatif')) return 2;
+          if (v.includes('majeur')) return 4;
+          if (v.includes('critique')) return 5;
+
+          return null;
+        }
+
+        convertToAlpha3(value) {
+          if (!value) return null;
+          const v = String(value).trim().toLowerCase();
+
+          if (v.includes('faible') && !v.includes('tres')) return 'Faible';
+          if (v.includes('moyen') || v.includes('medium')) return 'Moyen';
+          if ((v.includes('eleve') || v.includes('élevé')) && !v.includes('tres')) return 'Élevé';
+
+          const num = parseFloat(v);
+          if (!isNaN(num)) {
+            if (num === 1) return 'Faible';
+            if (num === 2) return 'Moyen';
+            if (num === 3) return 'Élevé';
+            if (num <= 2) return 'Faible';
+            if (num === 3) return 'Moyen';
+            if (num >= 4) return 'Élevé';
+          }
+
+          if (v.includes('tres faible') || v.includes('très faible')) return 'Faible';
+          if (v.includes('modere') || v.includes('modéré')) return 'Moyen';
+          if (v.includes('tres eleve') || v.includes('très élevé')) return 'Élevé';
+
+          if (v.includes('mineur')) return 'Faible';
+          if (v.includes('significatif')) return 'Moyen';
+          if (v.includes('majeur') || v.includes('critique')) return 'Élevé';
+
+          return null;
+        }
+
+        convertToAlpha4(value) {
+          if (!value) return null;
+          const v = String(value).trim().toLowerCase();
+
+          if (v.includes('mineur')) return 'Mineur';
+          if (v.includes('significatif')) return 'Significatif';
+          if (v.includes('majeur') && !v.includes('critique')) return 'Majeur';
+          if (v.includes('critique')) return 'Critique';
+
+          const num = parseFloat(v);
+          if (!isNaN(num)) {
+            if (num === 1) return 'Mineur';
+            if (num === 2) return 'Significatif';
+            if (num === 3) return 'Majeur';
+            if (num === 4) return 'Critique';
+            if (num === 5) return 'Critique';
+          }
+
+          if (v.includes('faible') && !v.includes('tres')) return 'Mineur';
+          if (v.includes('moyen')) return 'Significatif';
+          if ((v.includes('eleve') || v.includes('élevé')) && !v.includes('tres')) return 'Majeur';
+
+          if (v.includes('tres faible') || v.includes('très faible')) return 'Mineur';
+          if (v.includes('modere') || v.includes('modéré')) return 'Significatif';
+          if (v.includes('tres eleve') || v.includes('très élevé')) return 'Critique';
+
+          return null;
+        }
+
+        convertToAlpha5(value) {
+          if (!value) return null;
+          const v = String(value).trim().toLowerCase();
+
+          if (v.includes('tres faible') || v.includes('très faible')) return 'Très faible';
+          if (v.includes('faible') && !v.includes('tres')) return 'Faible';
+          if (v.includes('modere') || v.includes('modéré')) return 'Modéré';
+          if (v.includes('eleve') && !v.includes('tres')) return 'Élevé';
+          if (v.includes('tres eleve') || v.includes('très élevé')) return 'Très élevé';
+
+          const num = parseFloat(v);
+          if (!isNaN(num)) {
+            if (num === 1) return 'Très faible';
+            if (num === 2) return 'Faible';
+            if (num === 3) return 'Modéré';
+            if (num === 4) return 'Élevé';
+            if (num === 5) return 'Très élevé';
+          }
+
+          if (v.includes('faible') && !v.includes('tres')) return 'Faible';
+          if (v.includes('moyen')) return 'Modéré';
+          if ((v.includes('eleve') || v.includes('élevé')) && !v.includes('tres')) return 'Élevé';
+
+          if (v.includes('mineur')) return 'Très faible';
+          if (v.includes('significatif')) return 'Faible';
+          if (v.includes('majeur')) return 'Élevé';
+          if (v.includes('critique')) return 'Très élevé';
+
+          return null;
+        }
+
+
     
     /**
      * Obtient les couleurs pour la matrice alphabétique 5 niveaux
@@ -2080,9 +2405,9 @@
           const probCell = cells[probIndex];
           const impactCell = cells[impactIndex];
           
-          // Normaliser les valeurs
-          const probValue = this.normalizeToAlpha3(probCell.textContent);
-          const impactValue = this.normalizeToAlpha3(impactCell.textContent);
+          // CONVERSION INTEGRALE: Convertir TOUTES les valeurs (numeriques ET alphabetiques)
+          const probValue = this.convertToAlpha3(probCell.textContent);
+          const impactValue = this.convertToAlpha3(impactCell.textContent);
           
           // Mettre à jour les cellules avec le format normalisé
           if (probValue) {
@@ -2150,8 +2475,8 @@
           const probCell = cells[probIndex];
           const impactCell = cells[impactIndex];
           
-          const probValue = this.normalizeToAlpha5(probCell.textContent);
-          const impactValue = this.normalizeToAlpha5(impactCell.textContent);
+          const probValue = this.convertToAlpha5(probCell.textContent);
+          const impactValue = this.convertToAlpha5(impactCell.textContent);
           
           if (probValue) {
             probCell.textContent = probValue;
@@ -2217,8 +2542,8 @@
           const probCell = cells[probIndex];
           const impactCell = cells[impactIndex];
           
-          const probValue = this.normalizeToAlpha4(probCell.textContent);
-          const impactValue = this.normalizeToAlpha4(impactCell.textContent);
+          const probValue = this.convertToAlpha4(probCell.textContent);
+          const impactValue = this.convertToAlpha4(impactCell.textContent);
           
           if (probValue) {
             probCell.textContent = probValue;
@@ -2285,8 +2610,8 @@
           const probCell = cells[probIndex];
           const impactCell = cells[impactIndex];
           
-          const probValue = this.normalizeToNum3(probCell.textContent);
-          const impactValue = this.normalizeToNum3(impactCell.textContent);
+          const probValue = this.convertToNumeric3(probCell.textContent);
+          const impactValue = this.convertToNumeric3(impactCell.textContent);
           
           if (probValue) {
             probCell.textContent = probValue;
@@ -2364,8 +2689,8 @@
           const probCell = cells[probIndex];
           const impactCell = cells[impactIndex];
           
-          const probValue = this.normalizeToNum4(probCell.textContent);
-          const impactValue = this.normalizeToNum4(impactCell.textContent);
+          const probValue = this.convertToNumeric4(probCell.textContent);
+          const impactValue = this.convertToNumeric4(impactCell.textContent);
           
           if (probValue) {
             probCell.textContent = probValue;
@@ -2443,8 +2768,8 @@
           const probCell = cells[probIndex];
           const impactCell = cells[impactIndex];
           
-          const probValue = this.normalizeToNum5(probCell.textContent);
-          const impactValue = this.normalizeToNum5(impactCell.textContent);
+          const probValue = this.convertToNumeric5(probCell.textContent);
+          const impactValue = this.convertToNumeric5(impactCell.textContent);
           
           if (probValue) {
             probCell.textContent = probValue;
