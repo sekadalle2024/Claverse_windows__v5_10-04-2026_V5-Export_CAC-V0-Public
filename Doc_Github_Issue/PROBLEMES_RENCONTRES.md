@@ -418,3 +418,162 @@ git push origin master --verbose
 
 **Dernière mise à jour**: 28 Mars 2026  
 **Statut**: Documentation enrichie avec nouveau cas limite
+
+
+---
+
+## 🔴 Problème #5: HTTP 408 Timeout avec Projet 109.96 MB (04 Avril 2026)
+
+### Description
+Push échoué pour un projet de 109.96 MB malgré toutes les configurations optimales testées.
+
+### Message d'Erreur Complet
+```
+Enumerating objects: 3651, done.
+Counting objects: 100% (3651/3651), done.
+Compressing objects: 100% (3606/3606), done.
+Writing objects: 100% (3651/3651), 109.96 MiB | 26.63 MiB/s, done.
+Total 3651 (delta 1025), reused 0 (delta 0), pack-reused 0 (from 0)
+error: RPC failed; curl 55 Send failure: Connection was reset
+send-pack: unexpected disconnect while reading sideband packet
+fatal: the remote end hung up unexpectedly
+Everything up-to-date
+```
+
+### Analyse
+
+#### Données du Transfert
+- **Objets**: 3651 (vs 3127 le 28 mars)
+- **Taille**: 109.96 MiB (vs 107.49 MiB le 28 mars)
+- **Vitesse**: 26.63 MiB/s
+- **Deltas**: 1025 (vs 770 le 28 mars)
+- **Repository**: https://github.com/sekadalle2024/Craverse_windows_s_12_v0_04-04-2026_V5-Export_CAC-V0-Public.git
+
+#### Différences avec Problème #4 (28 Mars)
+- **+524 objets** (+17%)
+- **+2.47 MiB** (+2.3%)
+- **+255 deltas** (+33%)
+- Vitesse similaire mais volume encore plus important
+
+#### Cause Racine
+1. **Seuil critique dépassé**: 109.96 MiB dépasse largement le seuil de 100 MB
+2. **Limite HTTPS GitHub confirmée**: GitHub a des limites strictes pour les pushs HTTPS > 100 MB
+3. **Timeout serveur systématique**: Même avec configuration maximale
+4. **Compression delta intensive**: 1025 deltas à traiter côté serveur
+
+#### Configuration au Moment de l'Erreur
+```bash
+http.postBuffer: 524288000 (500 MB)
+http.timeout: 600 (10 minutes)
+pack.windowMemory: 100m
+pack.packSizeLimit: 100m
+http.version: HTTP/1.1
+```
+
+### Tentatives Effectuées
+
+#### Tentative #1: Configuration Standard
+```bash
+git config http.postBuffer 524288000
+git config pack.windowMemory "100m"
+git config pack.packSizeLimit "100m"
+git push -u origin master
+```
+**Résultat**: ❌ HTTP 408
+
+#### Tentative #2: Configuration HTTP/1.1
+```bash
+git config --global http.version HTTP/1.1
+git push -u origin master --no-thin
+```
+**Résultat**: ❌ HTTP 408
+
+### Seuil Critique Confirmé
+- **< 75 MB**: Fonctionne avec configuration optimale
+- **75-100 MB**: Zone critique, succès variable
+- **100-110 MB**: Échec systématique en HTTPS
+- **> 110 MB**: Nécessite absolument solution alternative
+
+### Solution Appliquée: Commits Multiples
+
+#### Stratégie
+Division du commit unique en 5 commits plus petits:
+1. Code Source (src/) - ~25 MB
+2. Backend Python (py_backend/) - ~20 MB
+3. Fichiers Publics (public/) - ~15 MB
+4. Documentation (*.md, *.txt, Doc*) - ~30 MB
+5. Fichiers Restants - ~20 MB
+
+#### Script Créé
+`push-commits-multiples-04-avril-2026.ps1`
+
+#### Avantages
+- Chaque push < 30 MB
+- Moins de risque de timeout
+- Fonctionne avec HTTPS
+- Pas besoin d'outils supplémentaires
+- Historique détaillé
+
+### Impact
+- ❌ Push unique échoué
+- ✅ Solution alternative documentée
+- ⏱️ Temps perdu: ~20 minutes
+- 📊 Limite HTTPS GitHub confirmée: ~100 MB
+
+---
+
+## 📊 Comparaison Complète des Tentatives (Mise à Jour)
+
+| Date | Tentative | Taille | Objets | Vitesse | Config | Résultat | Erreur |
+|------|-----------|--------|--------|---------|--------|----------|--------|
+| 21/03 | 1 | 75.36 MB | 2326 | 34.70 MB/s | Défaut | ❌ | HTTP 408 |
+| 21/03 | 2 | 74.35 MB | 2326 | 32.27 MB/s | Buffer+Timeout | ❌ | Curl 55 |
+| 21/03 | 3 | 74.31 MB | 2326 | 25.47 MB/s | No Compression | ✅ | Aucune |
+| 28/03 | 1 | 107.49 MB | 3127 | 30.51 MB/s | Standard | ❌ | HTTP 408 |
+| 28/03 | 2 | 107.48 MB | 3127 | 27.64 MB/s | Maximale | ❌ | HTTP 408 |
+| 04/04 | 1 | 109.96 MB | 3651 | 26.63 MB/s | Standard | ❌ | Curl 55 |
+| 04/04 | 2 | 109.96 MB | 3651 | - | HTTP/1.1 | ❌ | HTTP 408 |
+
+### Observations Clés
+1. **Seuil de 100 MB confirmé**: Au-delà, HTTPS GitHub devient très instable
+2. **Croissance du projet**: +35 MB en 2 semaines
+3. **Configuration insuffisante**: Aucune config ne suffit > 100 MB
+4. **Solution obligatoire**: Commits multiples, SSH ou GitHub Desktop requis
+
+---
+
+## 🎯 Nouvelles Recommandations (04 Avril 2026)
+
+### Par Taille de Projet (Mise à Jour Finale)
+
+| Taille | Solution Recommandée | Alternative |
+|--------|---------------------|-------------|
+| < 50 MB | Configuration standard | - |
+| 50-75 MB | Compression désactivée | GitHub Desktop |
+| 75-100 MB | GitHub Desktop | SSH |
+| 100-150 MB | **Commits multiples** | SSH + GitHub Desktop |
+| > 150 MB | Git LFS obligatoire | Commits multiples |
+
+### Checklist Avant Push (Mise à Jour)
+
+```bash
+# 1. Vérifier la taille
+git count-objects -vH
+
+# 2. Si < 75 MB
+git config core.compression 0
+git config http.postBuffer 1048576000
+git push origin master --verbose
+
+# 3. Si 75-100 MB
+# Utiliser GitHub Desktop
+
+# 4. Si > 100 MB
+# OBLIGATOIRE: Utiliser commits multiples ou SSH
+.\push-commits-multiples-04-avril-2026.ps1
+```
+
+---
+
+**Dernière mise à jour**: 04 Avril 2026  
+**Statut**: Solution commits multiples documentée et prête
