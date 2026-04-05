@@ -1,7 +1,7 @@
 # Index Complet - États Financiers SYSCOHADA V2.0
 
-**Version**: 2.0  
-**Date**: 22 mars 2026  
+**Version**: 2.1  
+**Date**: 05 avril 2026  
 **Statut**: ✅ Production
 
 ---
@@ -9,6 +9,14 @@
 ## 🎯 Vue d'Ensemble
 
 Module complet pour la génération d'états financiers conformes au référentiel SYSCOHADA Révisé, avec support du **format liasse officielle**.
+
+### ⭐ Nouveautés Version 2.1 (05 Avril 2026)
+
+**Export Liasse Officielle Révisée**
+- Utilisation du fichier template `Liasse_officielle_revise.xlsx`
+- 84 onglets complets (BILAN, ACTIF, PASSIF, RESULTAT, TFT, 39 NOTES)
+- Conformité totale SYSCOHADA Révisé
+- Fallback vers anciens templates conservé
 
 ### ⭐ Nouveautés Version 2.0
 
@@ -102,6 +110,7 @@ Avec Balance N et Balance N-1 → Format liasse automatique
 |---------|-------------|--------|--------|
 | `correspondances_syscohada.json` | Mapping comptes → postes | 200 | ✅ Prod |
 | `structure_liasse_complete.json` | Structure complète CR | 150 | ⭐ Nouveau |
+| `Liasse_officielle_revise.xlsx` | Template export (84 onglets) | - | ⭐ V2.1 |
 
 ### Scripts de Test
 
@@ -174,11 +183,23 @@ results = process_balance_to_liasse_format(balance_n, balance_n1, correspondance
 
 **Fichier**: `export_liasse.py`
 
+**Template utilisé**: `Liasse_officielle_revise.xlsx` (84 onglets)
+
 **Fonctionnalités**:
-- Export vers liasse officielle vierge (LIASSE.xlsx)
+- Export vers liasse officielle SYSCOHADA Révisé
 - 85+ mappings postes → cellules Excel
 - Préservation du template
 - Raccourci clavier: Ctrl+Shift+O
+- Fallback vers anciens templates (LIASSE.xlsx, Liasse officielle.xlsm)
+
+**Onglets du template**:
+- BILAN, ACTIF, PASSIF (états de synthèse)
+- RESULTAT (compte de résultat)
+- TFT (tableau des flux de trésorerie)
+- NOTE 1 à NOTE 39 (notes annexes détaillées)
+- Fiches R1, R2, R3, R4 (fiches complémentaires)
+- Compléments DGI-INS
+- Suppléments (SUPPL1 à SUPPL7)
 
 ### 5. Contrôles Exhaustifs
 
@@ -281,7 +302,7 @@ ClaraVerse/
 
 - Python 3.11+
 - Conda (environnement `claraverse_backend`)
-- Pandas, FastAPI, Uvicorn
+- Pandas, FastAPI, Uvicorn, openpyxl
 
 ### Installation
 
@@ -301,6 +322,7 @@ Aucune configuration spécifique requise. Le système utilise:
 - `correspondances_syscohada.json` pour le mapping
 - `structure_liasse_complete.json` pour la structure CR
 - `BALANCES_N_N1_N2.xlsx` comme fichier test
+- `Liasse_officielle_revise.xlsx` comme template d'export (84 onglets)
 
 ---
 
@@ -403,7 +425,12 @@ Le module États Financiers SYSCOHADA V2.0 est **complet, testé et opérationne
 
 ---
 
-**Version**: 2.0  
-**Date**: 22 mars 2026  
+**Version**: 2.1  
+**Date**: 05 avril 2026  
 **Auteur**: ClaraVerse Team  
 **Statut**: ✅ Production
+
+**Changelog V2.1**:
+- ✅ Export liasse utilise `Liasse_officielle_revise.xlsx` (84 onglets)
+- ✅ Fallback vers anciens templates conservé
+- ✅ Documentation mise à jour

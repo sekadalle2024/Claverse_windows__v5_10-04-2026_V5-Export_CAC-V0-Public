@@ -1,0 +1,89 @@
+========================================
+QUICK TEST - 16 ETATS ACCORDEON
+========================================
+
+TEST 1: VERIFICATION AUTOMATISEE
+=================================
+.\Doc_Etat_Fin\Scripts\test-integration-16-etats-accordeon.ps1
+
+Verifie:
+- Module Python present
+- Styles CSS complets
+- Script JavaScript fonctionnel
+- Integration backend correcte
+
+Resultat attendu: TOUS LES TESTS PASSES
+
+TEST 2: GENERATION RAPIDE
+==========================
+python test-16-etats-rapide.py
+
+Resultat attendu:
+- 16 sections generees
+- ~37,000 caracteres
+- Tous les etats presents
+
+TEST 3: GENERATION AVEC BALANCE REELLE
+=======================================
+python py_backend/generer_test_etats_controle_html.py
+
+Resultat attendu:
+- Fichier HTML sur le Bureau
+- 16 etats avec donnees reelles
+- Accordeons fonctionnels
+
+TEST 4: VERIFICATION VISUELLE
+==============================
+1. Ouvrir le fichier HTML genere sur le Bureau
+2. Verifier que les 16 sections sont presentes
+3. Cliquer sur chaque section pour verifier l'accordeon
+4. Verifier les styles et les badges
+
+Elements a verifier:
+- Accordeons cliquables
+- Gradient violet pour les en-tetes
+- Boites colorees (success, warning, danger, info)
+- Badges avec couleurs
+- Animation de la fleche (rotation 90 degres)
+- Transition smooth
+
+TEST 5: TEST API
+================
+1. Demarrer le backend
+   cd py_backend
+   python main.py
+
+2. Tester l'endpoint
+   POST /etats-financiers/process-excel
+   Avec: Balance N et Balance N-1
+
+Resultat attendu:
+- Etats financiers complets
+- 16 etats de controle integres
+- Menu accordeon fonctionnel
+
+COMMANDES RAPIDES
+=================
+# Test automatise
+.\Doc_Etat_Fin\Scripts\test-integration-16-etats-accordeon.ps1
+
+# Generation rapide
+python test-16-etats-rapide.py
+
+# Generation avec balance
+python py_backend/generer_test_etats_controle_html.py
+
+# Demarrer le backend
+cd py_backend
+python main.py
+
+FICHIERS A CONSULTER
+====================
+- Doc_Etat_Fin/00_LIRE_INTEGRATION_16_ETATS_ACCORDEON.txt
+- Doc_Etat_Fin/Documentation/SOLUTION_INTEGRATION_16_ETATS_ACCORDEON_05_AVRIL_2026.md
+- 00_INTEGRATION_16_ETATS_ACCORDEON_REUSSIE_05_AVRIL_2026.txt
+
+STATUT
+======
+Date: 05 Avril 2026
+Statut: RESOLU ET VALIDE

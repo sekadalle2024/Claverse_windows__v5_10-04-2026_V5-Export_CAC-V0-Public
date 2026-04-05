@@ -1,0 +1,177 @@
+================================================================================
+CORRECTION EXPORT LIASSE OFFICIELLE - UTILISATION FICHIER RÉVISÉ
+================================================================================
+
+Date: 05 Avril 2026
+Statut: ✅ CORRIGÉ
+
+================================================================================
+PROBLÈME IDENTIFIÉ
+================================================================================
+
+Le script d'export de la liasse officielle (export_liasse.py) utilisait les 
+anciens fichiers template:
+  - LIASSE.xlsx
+  - Liasse officielle.xlsm
+
+Alors que le fichier à utiliser est:
+  - Liasse_officielle_revise.xlsx
+
+Ce fichier contient tous les onglets nécessaires pour la liasse SYSCOHADA Révisé:
+  - BILAN, ACTIF, PASSIF
+  - RESULTAT (Compte de Résultat)
+  - TFT (Tableau des Flux de Trésorerie)
+  - NOTE 1 à NOTE 39 (Notes annexes)
+  - Fiches complémentaires (R1, R2, R3, R4)
+
+================================================================================
+SOLUTION APPLIQUÉE
+================================================================================
+
+Modification du fichier: py_backend/export_liasse.py
+
+Fonction modifiée: remplir_liasse_officielle()
+
+AVANT:
+------
+template_path = "LIASSE.xlsx"
+if not os.path.exists(template_path):
+    template_path = "Liasse officielle.xlsm"
+    if not os.path.exists(template_path):
+        raise FileNotFoundError("Fichier template de liasse non trouvé")
+
+APRÈS:
+------
+template_path = "Liasse_officielle_revise.xlsx"
+if not os.path.exists(template_path):
+    # Essayer avec les anciens noms en fallback
+    template_path = "LIASSE.xlsx"
+    if not os.path.exists(template_path):
+        template_path = "Liasse officielle.xlsm"
+        if not os.path.exists(template_path):
+            raise FileNotFoundError("Fichier template de liasse non trouvé...")
+
+================================================================================
+AVANTAGES DE LA SOLUTION
+================================================================================
+
+✅ Utilise le fichier Liasse_officielle_revise.xlsx en priorité
+✅ Conserve les anciens fichiers en fallback (compatibilité)
+✅ Message d'erreur plus explicite
+✅ Aucun impact sur le reste du code
+✅ Tous les onglets nécessaires sont présents dans le nouveau fichier
+
+================================================================================
+STRUCTURE DU FICHIER Liasse_officielle_revise.xlsx
+================================================================================
+
+Onglets principaux:
+  - COUVERTURE, GARDE, RECEVABILITE
+  - BILAN (vue consolidée)
+  - ACTIF (détail actif)
+  - PASSIF (détail passif)
+  - RESULTAT (compte de résultat)
+  - TFT (tableau des flux de trésorerie)
+  - NOTE 1 à NOTE 39 (notes annexes détaillées)
+  - Fiches complémentaires (R1, R2, R3, R4)
+  - Compléments DGI-INS
+  - Suppléments (SUPPL1 à SUPPL7)
+
+Total: 80+ onglets pour une liasse complète SYSCOHADA Révisé
+
+================================================================================
+FICHIERS CONCERNÉS
+================================================================================
+
+Modifié:
+  ✅ py_backend/export_liasse.py
+
+Fichiers template disponibles:
+  📄 py_backend/Liasse_officielle_revise.xlsx (NOUVEAU - PRIORITAIRE)
+  📄 py_backend/LIASSE.xlsx (ancien - fallback)
+  📄 py_backend/Liasse officielle.xlsm (ancien - fallback)
+
+================================================================================
+TESTS À EFFECTUER
+================================================================================
+
+1. Test export liasse avec menu contextuel:
+   - Générer états financiers (Etat fin)
+   - Clic droit sur table
+   - Sélectionner "Exporter liasse officielle"
+   - Vérifier que le fichier exporté utilise le bon template
+
+2. Test via API:
+   POST /export-liasse/generer
+   - Vérifier que le fichier généré contient tous les onglets
+   - Vérifier que les valeurs sont correctement remplies
+
+3. Test script autonome:
+   cd py_backend
+   python generer_etats_liasse.py
+   - Vérifier la génération HTML
+   - Tester l'export Excel depuis le HTML
+
+================================================================================
+COMMANDES DE TEST
+================================================================================
+
+# Test rapide du template
+python -c "import openpyxl; wb = openpyxl.load_workbook('py_backend/Liasse_officielle_revise.xlsx'); print('Onglets:', len(wb.sheetnames))"
+
+# Test du script d'export
+cd py_backend
+python -c "from export_liasse import remplir_liasse_officielle; print('Import OK')"
+
+# Test complet
+cd py_backend
+python generer_etats_liasse.py
+
+================================================================================
+PROCHAINES ÉTAPES
+================================================================================
+
+1. ✅ Modifier export_liasse.py pour utiliser Liasse_officielle_revise.xlsx
+2. ⏳ Tester l'export via le menu contextuel
+3. ⏳ Vérifier le mapping des cellules pour le nouveau template
+4. ⏳ Mettre à jour les mappings si nécessaire (MAPPING_BILAN_ACTIF, etc.)
+5. ⏳ Documenter les différences entre ancien et nouveau template
+
+================================================================================
+NOTES IMPORTANTES
+================================================================================
+
+⚠️ Le nouveau fichier Liasse_officielle_revise.xlsx peut avoir des cellules
+   différentes pour les mêmes postes. Il faudra peut-être ajuster les mappings:
+   - MAPPING_BILAN_ACTIF
+   - MAPPING_BILAN_PASSIF
+   - MAPPING_COMPTE_RESULTAT_CHARGES
+   - MAPPING_COMPTE_RESULTAT_PRODUITS
+
+💡 Pour vérifier les cellules du nouveau template:
+   - Ouvrir Liasse_officielle_revise.xlsx
+   - Identifier les cellules pour chaque poste
+   - Comparer avec les mappings actuels
+   - Ajuster si nécessaire
+
+================================================================================
+DOCUMENTATION ASSOCIÉE
+================================================================================
+
+Voir aussi:
+  - Doc_Etat_Fin/00_INDEX_COMPLET_V2.md
+  - Doc_Etat_Fin/00_ARCHITECTURE_ETATS_FINANCIERS.md
+  - py_backend/export_liasse.py
+  - py_backend/generer_etats_liasse.py
+
+================================================================================
+RÉSUMÉ
+================================================================================
+
+✅ Script export_liasse.py modifié pour utiliser Liasse_officielle_revise.xlsx
+✅ Fallback vers anciens fichiers conservé pour compatibilité
+✅ Message d'erreur amélioré
+⏳ Tests à effectuer pour valider le fonctionnement
+⏳ Vérification des mappings de cellules à faire
+
+================================================================================

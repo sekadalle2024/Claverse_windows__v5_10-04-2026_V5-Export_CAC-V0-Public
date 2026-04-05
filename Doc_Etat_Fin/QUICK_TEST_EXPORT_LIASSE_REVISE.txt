@@ -1,0 +1,141 @@
+================================================================================
+QUICK TEST - EXPORT LIASSE OFFICIELLE RÉVISÉE
+================================================================================
+
+✅ MODIFICATION EFFECTUÉE
+================================================================================
+
+Fichier modifié: py_backend/export_liasse.py
+
+Le script utilise maintenant en priorité:
+  📄 Liasse_officielle_revise.xlsx
+
+Avec fallback vers:
+  📄 LIASSE.xlsx
+  📄 Liasse officielle.xlsm
+
+✅ VÉRIFICATION TEMPLATE
+================================================================================
+
+Fichier: py_backend/Liasse_officielle_revise.xlsx
+Nombre d'onglets: 84
+
+Onglets principaux:
+  - COUVERTURE, GARDE, RECEVABILITE
+  - BILAN, ACTIF, PASSIF
+  - RESULTAT (Compte de Résultat)
+  - TFT (Tableau des Flux de Trésorerie)
+  - NOTE 1 à NOTE 39 (Notes annexes)
+  - Fiches R1, R2, R3, R4
+  - Compléments DGI-INS
+  - Suppléments (SUPPL1 à SUPPL7)
+
+✅ TESTS À EFFECTUER
+================================================================================
+
+1. TEST VIA MENU CONTEXTUEL
+   -------------------------
+   a) Générer les états financiers:
+      - Taper "Etat fin" dans le chat
+      - Sélectionner le fichier Balance Excel
+      - Attendre la génération des états
+   
+   b) Exporter la liasse:
+      - Clic droit sur la table des états financiers
+      - Sélectionner "📥 Exporter liasse officielle"
+      - Vérifier que le fichier téléchargé utilise le bon template
+   
+   c) Vérifier le fichier exporté:
+      - Ouvrir le fichier Excel téléchargé
+      - Vérifier qu'il contient tous les onglets
+      - Vérifier que les valeurs sont remplies
+
+2. TEST VIA SCRIPT AUTONOME
+   -------------------------
+   cd py_backend
+   conda activate claraverse_backend
+   python generer_etats_liasse.py
+   
+   Résultat attendu:
+   - Fichier HTML généré sur le Bureau
+   - Contient tous les états financiers
+   - Option d'export Excel disponible
+
+3. TEST VIA API
+   ------------
+   POST http://localhost:5000/export-liasse/generer
+   
+   Body:
+   {
+     "results": {...},
+     "nom_entreprise": "TEST SA",
+     "exercice": "2024"
+   }
+   
+   Résultat attendu:
+   - Fichier Excel en base64
+   - Nom: Liasse_Officielle_TEST_SA_2024.xlsx
+
+⚠️ POINTS D'ATTENTION
+================================================================================
+
+1. MAPPINGS DE CELLULES
+   Le nouveau fichier Liasse_officielle_revise.xlsx peut avoir des cellules
+   différentes pour les postes. Vérifier les mappings:
+   
+   - MAPPING_BILAN_ACTIF
+   - MAPPING_BILAN_PASSIF
+   - MAPPING_COMPTE_RESULTAT_CHARGES
+   - MAPPING_COMPTE_RESULTAT_PRODUITS
+   
+   Si les valeurs ne s'affichent pas correctement, il faudra ajuster ces
+   mappings dans export_liasse.py
+
+2. ONGLETS DU TEMPLATE
+   Le nouveau fichier a des onglets différents:
+   - Ancien: "Bilan", "Compte de résultat", "CR"
+   - Nouveau: "BILAN", "ACTIF", "PASSIF", "RESULTAT"
+   
+   Le code vérifie déjà plusieurs noms d'onglets, mais il faudra peut-être
+   ajuster si nécessaire.
+
+3. FORMAT DES CELLULES
+   Vérifier que le format des cellules (nombre, devise, etc.) est préservé
+   lors du remplissage.
+
+📋 COMMANDES RAPIDES
+================================================================================
+
+# Vérifier le template
+python -c "import openpyxl; wb = openpyxl.load_workbook('py_backend/Liasse_officielle_revise.xlsx'); print('Onglets:', wb.sheetnames)"
+
+# Tester l'import (dans conda env)
+cd py_backend
+conda activate claraverse_backend
+python -c "from export_liasse import remplir_liasse_officielle; print('OK')"
+
+# Test complet
+cd py_backend
+conda activate claraverse_backend
+python generer_etats_liasse.py
+
+📚 DOCUMENTATION
+================================================================================
+
+Voir aussi:
+  - Doc_Etat_Fin/00_CORRECTION_EXPORT_LIASSE_REVISE_05_AVRIL_2026.txt
+  - Doc_Etat_Fin/00_INDEX_COMPLET_V2.md
+  - Doc_Etat_Fin/00_ARCHITECTURE_ETATS_FINANCIERS.md
+  - py_backend/export_liasse.py
+
+✅ RÉSUMÉ
+================================================================================
+
+✅ Script export_liasse.py modifié
+✅ Utilise Liasse_officielle_revise.xlsx en priorité
+✅ Fallback vers anciens fichiers conservé
+✅ Template vérifié (84 onglets)
+⏳ Tests à effectuer pour validation complète
+⏳ Vérification des mappings si nécessaire
+
+================================================================================

@@ -141,12 +141,51 @@ python test_tft_standalone.py
 - ✅ 8 contrôles TFT
 - ✅ Documentation complète
 
+## 🆕 NOUVEAUTÉS - 05 AVRIL 2026
+
+### États de Contrôle - Intégration Menu Accordéon
+
+Documentation complète pour l'intégration des 16 états de contrôle dans le menu accordéon:
+
+**Documentation créée:**
+- `Documentation/MEMO_PROBLEMES_PYTHON_F_STRINGS.md` - Règles f-strings Python
+- `Documentation/00_CORRECTION_F_STRING_05_AVRIL_2026.md` - Correction appliquée
+- `Documentation/ARCHITECTURE_MENU_ACCORDEON_ETATS_CONTROLE.md` - Architecture complète
+- `00_INDEX_COMPLET_ETATS_CONTROLE.md` - Index complet des états de contrôle
+
+**Scripts créés:**
+- `Scripts/add_etats_controle_to_menu.py` - Ajout au menu DemarrerMenu.tsx
+- `Scripts/test-menu-etats-controle.ps1` - Test de l'ajout au menu
+- `Scripts/test_integration_16_etats.py` - Test d'intégration Python
+- `Scripts/test-integration-16-etats.ps1` - Test d'intégration PowerShell
+- `Scripts/verifier-integration-complete.ps1` - Vérification complète
+
+**Problème résolu:**
+- Erreur f-string avec apostrophes échappées (`\'`)
+- Solution: Variables pré-définies avant le f-string
+- Tests validés: 16 états générés correctement
+
+**Quick Start:**
+```bash
+# Tester le backend
+python test-16-etats-rapide.py
+
+# Ajouter au menu
+python Doc_Etat_Fin/Scripts/add_etats_controle_to_menu.py
+
+# Vérifier l'intégration
+.\Doc_Etat_Fin\Scripts\verifier-integration-complete.ps1
+```
+
 ## 🎯 Prochaines Étapes
 
-1. ⏳ Intégration TFT dans l'interface utilisateur
-2. ⏳ Support multi-exercices (N, N-1, N-2)
-3. ⏳ Export Excel format liasse officielle
-4. ⏳ Tests avec données réelles
+1. ✅ Documentation États de Contrôle complète
+2. ⏳ Créer composants React (EtatsControleAccordionRenderer)
+3. ⏳ Créer endpoint API /api/etats-controle
+4. ⏳ Intégration TFT dans l'interface utilisateur
+5. ⏳ Support multi-exercices (N, N-1, N-2)
+6. ⏳ Export Excel format liasse officielle
+7. ⏳ Tests avec données réelles
 
 ## 📞 Support
 
