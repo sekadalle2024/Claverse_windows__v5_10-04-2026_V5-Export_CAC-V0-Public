@@ -1,25 +1,23 @@
 # -*- coding: utf-8 -*-
 """
 Module d'export de la liasse officielle Excel remplie avec les valeurs calculées
+Version dynamique : scan des onglets pour trouver les REF SYSCOHADA.
 """
 import pandas as pd
 import openpyxl
 from openpyxl import load_workbook
 import os
-import shutil
-from pathlib import Path
-from datetime import datetime
+import io
+import base64
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import logging
-import base64
-import io
+import datetime
 
 logger = logging.getLogger("export_liasse")
 
 router = APIRouter(prefix="/export-liasse", tags=["Export Liasse"])
-
 
 # ==================== MODÈLES PYDANTIC ====================
 
@@ -36,171 +34,185 @@ class ExportLiasseResponse(BaseModel):
     filename: Optional[str] = None
 
 
-# ==================== MAPPING POSTES VERS CELLULES ====================
-
-# Mapping des références de postes vers les cellules Excel de la liasse officielle
-# Format: {'ref_poste': 'cellule_excel'}
-
-MAPPING_BILAN_ACTIF = {
-    # ACTIF IMMOBILISÉ
-    'AD': 'C10',   # Charges immobilisées
-    'AE': 'C11',   # Frais de recherche et développement
-    'AF': 'C12',   # Brevets, licences, logiciels
-    'AG': 'C13',   # Fonds commercial
-    'AH': 'C14',   # Autres immobilisations incorporelles
-    'AI': 'C15',   # Terrains
-    'AJ': 'C16',   # Bâtiments
-    'AK': 'C17',   # Installations et agencements
-    'AL': 'C18',   # Matériel
-    'AM': 'C19',   # Matériel de transport
-    'AN': 'C20',   # Avances et acomptes versés sur immobilisations
-    'AP': 'C21',   # Titres de participation
-    'AQ': 'C22',   # Autres immobilisations financières
-    'AZ': 'C23',   # TOTAL ACTIF IMMOBILISÉ
-    
-    # ACTIF CIRCULANT
-    'BA': 'C25',   # Actif circulant HAO
-    'BB': 'C26',   # Stocks et encours
-    'BC': 'C27',   # Marchandises
-    'BD': 'C28',   # Matières premières
-    'BE': 'C29',   # Autres approvisionnements
-    'BF': 'C30',   # En-cours
-    'BG': 'C31',   # Produits fabriqués
-    'BH': 'C32',   # Fournisseurs, avances versées
-    'BI': 'C33',   # Clients
-    'BJ': 'C34',   # Autres créances
-    'BK': 'C35',   # Capital souscrit, appelé non versé
-    'BQ': 'C36',   # TOTAL ACTIF CIRCULANT
-    
-    # TRÉSORERIE-ACTIF
-    'BT': 'C38',   # Titres de placement
-    'BU': 'C39',   # Valeurs à encaisser
-    'BV': 'C40',   # Banques, chèques postaux, caisse
-    'BZ': 'C41',   # TOTAL TRÉSORERIE-ACTIF
-    
-    # ÉCARTS DE CONVERSION-ACTIF
-    'CA': 'C43',   # Diminution des créances
-    'CB': 'C44',   # Augmentation des dettes
-    'CZ': 'C45',   # TOTAL ÉCARTS DE CONVERSION-ACTIF
-}
-
-MAPPING_BILAN_PASSIF = {
-    # CAPITAUX PROPRES
-    'DA': 'E10',   # Capital
-    'DB': 'E11',   # Apporteurs, capital non appelé
-    'DC': 'E12',   # Primes liées au capital social
-    'DD': 'E13',   # Écarts de réévaluation
-    'DE': 'E14',   # Réserves indisponibles
-    'DF': 'E15',   # Réserves libres
-    'DG': 'E16',   # Report à nouveau
-    'DH': 'E17',   # Résultat net de l'exercice
-    'DI': 'E18',   # Subventions d'investissement
-    'DJ': 'E19',   # Provisions réglementées
-    'DZ': 'E20',   # TOTAL CAPITAUX PROPRES
-    
-    # DETTES FINANCIÈRES ET RESSOURCES ASSIMILÉES
-    'RA': 'E22',   # Emprunts
-    'RB': 'E23',   # Dettes de crédit-bail et contrats assimilés
-    'RC': 'E24',   # Dettes financières diverses
-    'RD': 'E25',   # Provisions financières pour risques et charges
-    'RZ': 'E26',   # TOTAL DETTES FINANCIÈRES
-    
-    # PASSIF CIRCULANT
-    'TA': 'E28',   # Dettes circulantes HAO
-    'TB': 'E29',   # Clients, avances reçues
-    'TC': 'E30',   # Fournisseurs d'exploitation
-    'TD': 'E31',   # Dettes fiscales
-    'TE': 'E32',   # Dettes sociales
-    'TF': 'E33',   # Autres dettes
-    'TG': 'E34',   # Provisions pour risques à court terme
-    'TZ': 'E35',   # TOTAL PASSIF CIRCULANT
-    
-    # TRÉSORERIE-PASSIF
-    'UA': 'E37',   # Banques, crédits d'escompte
-    'UB': 'E38',   # Banques, crédits de trésorerie
-    'UC': 'E39',   # Banques, découverts
-    'UZ': 'E40',   # TOTAL TRÉSORERIE-PASSIF
-    
-    # ÉCARTS DE CONVERSION-PASSIF
-    'VA': 'E42',   # Augmentation des créances
-    'VB': 'E43',   # Diminution des dettes
-    'VZ': 'E44',   # TOTAL ÉCARTS DE CONVERSION-PASSIF
-}
-
-MAPPING_COMPTE_RESULTAT_CHARGES = {
-    # ACTIVITÉ D'EXPLOITATION
-    'TA': 'C10',   # Achats de marchandises
-    'TB': 'C11',   # Variation de stocks de marchandises
-    'TC': 'C12',   # Achats de matières premières
-    'TD': 'C13',   # Variation de stocks de matières
-    'TE': 'C14',   # Autres achats
-    'TF': 'C15',   # Variation de stocks d'autres approvisionnements
-    'TG': 'C16',   # Transports
-    'TH': 'C17',   # Services extérieurs
-    'TI': 'C18',   # Impôts et taxes
-    'TJ': 'C19',   # Autres charges
-    'TK': 'C20',   # Charges de personnel
-    'TL': 'C21',   # Dotations aux amortissements
-    'TM': 'C22',   # Dotations aux provisions
-    'TZ': 'C23',   # TOTAL CHARGES D'EXPLOITATION
-    
-    # ACTIVITÉ FINANCIÈRE
-    'UA': 'C25',   # Frais financiers
-    'UB': 'C26',   # Pertes de change
-    'UC': 'C27',   # Dotations aux amortissements et provisions
-    'UZ': 'C28',   # TOTAL CHARGES FINANCIÈRES
-    
-    # HORS ACTIVITÉS ORDINAIRES (HAO)
-    'XA': 'C30',   # Valeurs comptables des cessions d'immobilisations
-    'XB': 'C31',   # Charges HAO constatées
-    'XC': 'C32',   # Dotations HAO
-    'XZ': 'C33',   # TOTAL CHARGES HAO
-}
-
-MAPPING_COMPTE_RESULTAT_PRODUITS = {
-    # ACTIVITÉ D'EXPLOITATION
-    'RA': 'E10',   # Ventes de marchandises
-    'RB': 'E11',   # Ventes de produits fabriqués
-    'RC': 'E12',   # Travaux, services vendus
-    'RD': 'E13',   # Production stockée
-    'RE': 'E14',   # Production immobilisée
-    'RF': 'E15',   # Subventions d'exploitation
-    'RG': 'E16',   # Autres produits
-    'RH': 'E17',   # Reprises de provisions
-    'RI': 'E18',   # Transferts de charges
-    'RZ': 'E19',   # TOTAL PRODUITS D'EXPLOITATION
-    
-    # ACTIVITÉ FINANCIÈRE
-    'SA': 'E21',   # Revenus financiers
-    'SB': 'E22',   # Gains de change
-    'SC': 'E23',   # Reprises de provisions
-    'SD': 'E24',   # Transferts de charges
-    'SZ': 'E25',   # TOTAL PRODUITS FINANCIERS
-    
-    # HORS ACTIVITÉS ORDINAIRES (HAO)
-    'YA': 'E27',   # Produits des cessions d'immobilisations
-    'YB': 'E28',   # Produits HAO constatés
-    'YC': 'E29',   # Reprises HAO
-    'YD': 'E30',   # Transferts de charges
-    'YZ': 'E31',   # TOTAL PRODUITS HAO
-}
-
-
 # ==================== FONCTIONS D'EXPORT ====================
+
+def chercher_ref_dans_feuille(ws, code_ref: str) -> list:
+    """
+    Cherche toutes les occurrences d'un code REF (ex: 'AD')
+    dans les colonnes A, B, J, K d'une feuille Excel.
+    Retourne une liste de tuples (ligne, colonne_ref).
+    """
+    occurrences = []
+    
+    # Colonnes où les REF sont susceptibles de se trouver
+    cols_to_check = [1, 2, 10, 11] # A, B, J, K
+    
+    # Chercher sur les 100 premières lignes pour des raisons de perf
+    max_row = min(ws.max_row, 150)
+    for r in range(1, max_row + 1):
+        for c in cols_to_check:
+            cell = ws.cell(row=r, column=c)
+            # Vérifier si on a la REF exacte
+            if cell.value and str(cell.value).strip() == code_ref:
+                occurrences.append((r, c))
+                
+    return occurrences
+
+def ecrire_valeur_si_trouve(ws, ligne: int, colonne: int, montant: float):
+    """
+    Écrit le montant s'il y a lieu. Force l'effacement des éventuelles formules Excel.
+    """
+    if montant is None:
+        return
+        
+    try:
+        cell = ws.cell(row=ligne, column=colonne)
+        
+        # S'il y a une cellule fusionnée, il faut écrire dans la cellule en haut à gauche
+        # openpyxl écrit par defaut dans la bonne cellule si l'index est le coin supérieur gauche,
+        # mais sinon c'est ignoré. Dans notre cas on cible directement les colonnes H/I/J.
+        
+        # Forcer la valeur en écrasant toute formule
+        cell.value = montant
+        # Réappliquer le format nombre si nécessaire
+        cell.number_format = '#,##0'
+    except Exception as e:
+        logger.warning(f"Erreur d'écriture à la cellule {ws.title} L{ligne}C{colonne}: {e}")
+
+def nettoyer_montant(valeur) -> float:
+    """S'assure que la valeur est un float numérique"""
+    if valeur is None or valeur == '':
+        return 0.0
+    try:
+        if isinstance(valeur, str):
+            valeur = valeur.replace(' ', '').replace(',', '.')
+        res = float(valeur)
+        import math
+        if math.isnan(res):
+            return 0.0
+        return res
+    except (ValueError, TypeError):
+        return 0.0
+
+def injecter_donnees_dans_onglet(ws, type_onglet: str, data: list):
+    """
+    Injecte les données dynamiquement dans l'onglet approprié.
+    Le format attendu de 'data' est une liste de dict :
+    [{'ref': 'AD', 'montant_n': 100, 'montant_n1': 50, ...}]
+    """
+    logger.info(f"    Injection de {len(data)} postes dans l'onglet {ws.title} (Type: {type_onglet})")
+    
+    compteur = 0
+    for poste in data:
+        ref = poste.get('ref')
+        if not ref:
+            continue
+            
+        occurrences = chercher_ref_dans_feuille(ws, ref)
+        if not occurrences:
+            continue
+            
+        # Pour chaque occurrence trouvée
+        for ligne, col_ref in occurrences:
+            # ACTIF (Bilan ou onglet Actif dédié)
+            if type_onglet == 'ACTIF':
+                # Généralement REF en Col A
+                # BRUT=F, AMORT=G, NET_N=H, NET_N1=I
+                brut = nettoyer_montant(poste.get('brut', 0))
+                amort = nettoyer_montant(poste.get('amort_deprec', 0))
+                net_n = nettoyer_montant(poste.get('montant_n', poste.get('net', 0)))
+                net_n1 = nettoyer_montant(poste.get('montant_n1', 0))
+                
+                # Sauf si on est au passif sur le Bilan complet, mais type_onglet discrimine
+                
+                if brut != 0:
+                    ecrire_valeur_si_trouve(ws, ligne, 6, brut) # F
+                if amort != 0:
+                    ecrire_valeur_si_trouve(ws, ligne, 7, amort) # G
+                if net_n != 0:
+                    ecrire_valeur_si_trouve(ws, ligne, 8, net_n) # H
+                if net_n1 != 0:
+                    ecrire_valeur_si_trouve(ws, ligne, 9, net_n1) # I
+                    
+            # PASSIF
+            elif type_onglet == 'PASSIF':
+                net_n = nettoyer_montant(poste.get('montant_n', 0))
+                net_n1 = nettoyer_montant(poste.get('montant_n1', 0))
+                
+                # Format commun: REF en A, NET_N en F ou H, NET_N1 en G ou I
+                # Dans Liasse Officielle, le Bilan global a Passif souvent décalé
+                # Mais si c'est un onglet PASSIF spécifique :
+                # Si on est dans le Bilan consolidé, réf Passif en col J -> ecrire en M(13)/N(14)
+                if col_ref >= 8: # Par ex col J (10)
+                    if net_n != 0:
+                        ecrire_valeur_si_trouve(ws, ligne, col_ref + 3, net_n)
+                    if net_n1 != 0:
+                        ecrire_valeur_si_trouve(ws, ligne, col_ref + 4, net_n1)
+                else:
+                    # Onglet Passif dédié
+                    if net_n != 0:
+                        ecrire_valeur_si_trouve(ws, ligne, 6, net_n) # F ou ajustez si besoin, essayons F=6, G=7 pour Passif seul
+                    if net_n1 != 0:
+                        ecrire_valeur_si_trouve(ws, ligne, 7, net_n1)
+            
+            # RESULTAT
+            elif type_onglet == 'RESULTAT':
+                net_n = nettoyer_montant(poste.get('montant_n', 0))
+                net_n1 = nettoyer_montant(poste.get('montant_n1', 0))
+                # Sur résultat, on pointe souvent sur N en J(10)/I(9)
+                col_n = 5 if col_ref <= 2 else 6
+                try: 
+                    # Essayons I et J (9 et 10) qui sont standard sur CR
+                    ecrire_valeur_si_trouve(ws, ligne, 9, net_n)
+                    ecrire_valeur_si_trouve(ws, ligne, 10, net_n1)
+                except:
+                    pass
+                    
+            # TFT
+            elif type_onglet == 'TFT':
+                net_n = nettoyer_montant(poste.get('montant_n', 0))
+                net_n1 = nettoyer_montant(poste.get('montant_n1', 0))
+                # TFT : souvent N=F(6), N1=G(7) ou N=I(9), N1=J(10)/K(11)
+                try:
+                    ecrire_valeur_si_trouve(ws, ligne, 9, net_n) # I
+                    ecrire_valeur_si_trouve(ws, ligne, 11, net_n1) # K
+                except:
+                    pass
+                    
+            compteur += 1
+            
+    logger.info(f"    -> {compteur} valeurs injectées.")
+
+
+def convertir_dict_tft_vers_liste(tft_dict) -> list:
+    """
+    Le backend tft_v2 peut retourner un dict avec d'autres clés ('controles', etc).
+    Si on nous passe l'objet global 'tft', il faut extraire la liste des postes.
+    """
+    if isinstance(tft_dict, list):
+        return tft_dict
+    elif isinstance(tft_dict, dict):
+        if 'tft' in tft_dict and isinstance(tft_dict['tft'], list):
+            return tft_dict['tft']
+        # Ancien format où les clés étaient ZA_tresorerie...
+        data_list = []
+        for key, value in tft_dict.items():
+            if isinstance(value, dict) and 'montant' in value:
+                # Extraire la REF du début de la clé (ex: 'ZA_tresorerie_ouverture' -> 'ZA')
+                ref = key[:2] if len(key) >= 2 and key[:2].isalpha() and key[:2].isupper() else key
+                data_list.append({
+                    'ref': ref,
+                    'montant_n': value['montant'],
+                    'montant_n1': value.get('montant_n1', 0)
+                })
+        return data_list
+    return []
 
 def remplir_liasse_officielle(results: Dict[str, Any], nom_entreprise: str, exercice: str) -> bytes:
     """
-    Remplit la liasse officielle avec les valeurs calculées
-    
-    Args:
-        results: Résultats des états financiers
-        nom_entreprise: Nom de l'entreprise
-        exercice: Exercice comptable (ex: "2024")
-    
-    Returns:
-        Contenu du fichier Excel en bytes
+    Remplit la liasse officielle avec les valeurs calculées via scanner dynamique
     """
-    logger.info("📊 Début du remplissage de la liasse officielle")
+    logger.info("📊 Début du remplissage de la liasse officielle (Moteur Dynamique)")
     
     # Chemin du template (fichier vierge)
     # PRIORITÉ: Utiliser Liasse_officielle_revise.xlsx (84 onglets SYSCOHADA Révisé)
@@ -211,84 +223,75 @@ def remplir_liasse_officielle(results: Dict[str, Any], nom_entreprise: str, exer
         if not os.path.exists(template_path):
             template_path = "Liasse officielle.xlsm"
             if not os.path.exists(template_path):
-                raise FileNotFoundError("Fichier template de liasse non trouvé (Liasse_officielle_revise.xlsx, LIASSE.xlsx ou Liasse officielle.xlsm)")
+                raise FileNotFoundError("Fichier template de liasse non trouvé (Liasse_officielle_revise.xlsx)")
     
     logger.info(f"📂 Template trouvé: {template_path}")
     
     # Charger le workbook
     wb = load_workbook(template_path)
     
-    # Remplir les informations générales
-    if 'Bilan' in wb.sheetnames:
-        ws_bilan = wb['Bilan']
-        # Cellules pour nom entreprise et exercice (à adapter selon le template)
-        # ws_bilan['A1'] = nom_entreprise
-        # ws_bilan['A2'] = f"Exercice {exercice}"
+    # Remplir Informations
+    # Le comportement exact varie, mais "PAGE DE GARDE" ou "BILAN"
     
-    # Remplir le BILAN - ACTIF
-    if 'Bilan' in wb.sheetnames:
-        ws_bilan = wb['Bilan']
-        logger.info("📝 Remplissage Bilan Actif...")
-        
-        for ref, cellule in MAPPING_BILAN_ACTIF.items():
-            if ref in results.get('bilan_actif', {}):
-                montant = results['bilan_actif'][ref]['montant']
-                try:
-                    ws_bilan[cellule] = montant
-                    logger.debug(f"   {ref} -> {cellule}: {montant:,.2f}")
-                except Exception as e:
-                    logger.warning(f"   Erreur {ref} -> {cellule}: {e}")
-    
-    # Remplir le BILAN - PASSIF
-    if 'Bilan' in wb.sheetnames:
-        ws_bilan = wb['Bilan']
-        logger.info("📝 Remplissage Bilan Passif...")
-        
-        for ref, cellule in MAPPING_BILAN_PASSIF.items():
-            if ref in results.get('bilan_passif', {}):
-                montant = results['bilan_passif'][ref]['montant']
-                try:
-                    ws_bilan[cellule] = montant
-                    logger.debug(f"   {ref} -> {cellule}: {montant:,.2f}")
-                except Exception as e:
-                    logger.warning(f"   Erreur {ref} -> {cellule}: {e}")
-    
-    # Remplir le COMPTE DE RÉSULTAT - CHARGES
-    if 'Compte de résultat' in wb.sheetnames or 'CR' in wb.sheetnames:
-        ws_cr = wb.get('Compte de résultat', wb.get('CR'))
-        if ws_cr:
-            logger.info("📝 Remplissage Compte de Résultat - Charges...")
+    # Bilan Actif (liste ou dict de listes format V2)
+    bilan_actif_data = results.get('bilan_actif', [])
+    if isinstance(bilan_actif_data, dict):
+         # Cas où le routeur non-V2 nous a envoyé un dictionnaire
+         bilan_actif_data = [v for k, v in bilan_actif_data.items() if isinstance(v, dict) and 'ref' in v]
+         
+    # Pour l'actif, on peut aussi utiliser 'actif_detaille' si disponible car il contient brut/amort
+    actif_source = results.get('actif_detaille', bilan_actif_data)
+    if isinstance(actif_source, dict):
+         actif_source = [v for k, v in actif_source.items() if isinstance(v, dict)]
+
+    bilan_passif_data = results.get('bilan_passif', [])
+    if isinstance(bilan_passif_data, dict):
+         bilan_passif_data = [v for k, v in bilan_passif_data.items() if isinstance(v, dict) and 'ref' in v]
+
+    # Compte de Résultat
+    cr_data = results.get('compte_resultat', [])
+    if not cr_data:
+        # Essayer de fusionner charges et produits si ancien format
+        charges = results.get('charges', {})
+        produits = results.get('produits', {})
+        if isinstance(charges, dict):
+            cr_data.extend([v for k, v in charges.items() if isinstance(v, dict)])
+        if isinstance(produits, dict):
+            cr_data.extend([v for k, v in produits.items() if isinstance(v, dict)])
             
-            for ref, cellule in MAPPING_COMPTE_RESULTAT_CHARGES.items():
-                if ref in results.get('charges', {}):
-                    montant = results['charges'][ref]['montant']
-                    try:
-                        ws_cr[cellule] = montant
-                        logger.debug(f"   {ref} -> {cellule}: {montant:,.2f}")
-                    except Exception as e:
-                        logger.warning(f"   Erreur {ref} -> {cellule}: {e}")
-    
-    # Remplir le COMPTE DE RÉSULTAT - PRODUITS
-    if 'Compte de résultat' in wb.sheetnames or 'CR' in wb.sheetnames:
-        ws_cr = wb.get('Compte de résultat', wb.get('CR'))
-        if ws_cr:
-            logger.info("📝 Remplissage Compte de Résultat - Produits...")
+    # TFT
+    tft_data = convertir_dict_tft_vers_liste(results.get('tft', []))
+
+    # Parcourir tous les onglets pour injecter de manière opportuniste
+    for name in wb.sheetnames:
+        ws = wb[name]
+        
+        # Onglets Actif
+        if 'ACTIF' in name.upper() or 'BILAN' in name.upper():
+            logger.info(f"→ Scan onglet {name} pour l'ACTIF")
+            injecter_donnees_dans_onglet(ws, 'ACTIF', actif_source)
             
-            for ref, cellule in MAPPING_COMPTE_RESULTAT_PRODUITS.items():
-                if ref in results.get('produits', {}):
-                    montant = results['produits'][ref]['montant']
-                    try:
-                        ws_cr[cellule] = montant
-                        logger.debug(f"   {ref} -> {cellule}: {montant:,.2f}")
-                    except Exception as e:
-                        logger.warning(f"   Erreur {ref} -> {cellule}: {e}")
-    
+        # Onglets Passif
+        if 'PASSIF' in name.upper() or 'BILAN' in name.upper():
+            logger.info(f"→ Scan onglet {name} pour le PASSIF")
+            injecter_donnees_dans_onglet(ws, 'PASSIF', bilan_passif_data)
+            
+        # Compte de Résultat
+        if 'RESULTAT' in name.upper() or 'CR' in name.upper() or 'RÉSULTAT' in name.upper():
+            logger.info(f"→ Scan onglet {name} pour le RÉSULTAT")
+            injecter_donnees_dans_onglet(ws, 'RESULTAT', cr_data)
+            
+        # TFT
+        if 'TFT' in name.upper() or 'TAFIRE' in name.upper():
+            logger.info(f"→ Scan onglet {name} pour le TFT")
+            injecter_donnees_dans_onglet(ws, 'TFT', tft_data)
+
     # Sauvegarder dans un buffer
     output = io.BytesIO()
     wb.save(output)
     output.seek(0)
     
-    logger.info("✅ Liasse officielle remplie avec succès")
+    logger.info("✅ Liasse officielle remplie avec succès (Méthode Scanner)")
     
     return output.getvalue()
 
@@ -304,21 +307,25 @@ async def generer_liasse(request: ExportLiasseRequest):
         logger.info("📥 Réception demande d'export liasse")
         
         # Déterminer l'exercice
-        exercice = request.exercice or datetime.now().year
+        if request.exercice:
+            exercice = request.exercice
+        else:
+            now_dt = datetime.datetime.now()
+            exercice = str(now_dt.year)
         
         # Remplir la liasse
         file_content = remplir_liasse_officielle(
             results=request.results,
             nom_entreprise=request.nom_entreprise,
-            exercice=str(exercice)
+            exercice=exercice
         )
         
         # Encoder en base64
         file_base64 = base64.b64encode(file_content).decode('utf-8')
         
         # Nom du fichier
-        filename = f"Liasse_Officielle_{request.nom_entreprise}_{exercice}.xlsx"
-        filename = filename.replace(' ', '_').replace('/', '_')
+        nom_entreprise_propre = request.nom_entreprise.replace(' ', '_').replace('/', '_')
+        filename = f"Liasse_Officielle_{nom_entreprise_propre}_{exercice}.xlsx"
         
         logger.info(f"✅ Liasse générée: {filename}")
         

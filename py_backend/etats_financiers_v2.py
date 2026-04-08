@@ -88,6 +88,7 @@ def process_balance_to_liasse_format(
         clean_number,
         match_compte_to_poste
     )
+    from calculer_actif_brut_amort import enrichir_actif_avec_brut_amort
     
     # Charger la structure complète
     structure_complete = load_structure_liasse_complete()
@@ -192,6 +193,9 @@ def process_balance_to_liasse_format(
     bilan_actif_complet = []
     bilan_passif_complet = []
     
+    actif_enrichi = enrichir_actif_avec_brut_amort(balance_n_df, correspondances, col_map_n)
+    actif_detaille_n = actif_enrichi.get('actif_detaille', {})
+    
     # Pour le bilan, on utilise les correspondances existantes
     for section_name in ['bilan_actif', 'bilan_passif']:
         if section_name in correspondances:
@@ -221,24 +225,38 @@ def process_balance_to_liasse_format(
             
             for poste in correspondances[section_name]:
                 ref = poste['ref']
-                liste_postes.append({
+                poste_dict = {
                     'ref': ref,
                     'libelle': poste['libelle'],
                     'note': '',
                     'montant_n': montants_n.get(ref, 0),
                     'montant_n1': montants_n1.get(ref, 0),
                     'montant_n2': montants_n2.get(ref, 0)
-                })
+                }
+                
+                if section_name == 'bilan_actif' and ref in actif_detaille_n:
+                    poste_dict['brut'] = actif_detaille_n[ref]['brut']
+                    poste_dict['amort_deprec'] = actif_detaille_n[ref]['amort_deprec']
+                    poste_dict['net'] = actif_detaille_n[ref]['net']
+                    poste_dict['montant_n'] = actif_detaille_n[ref]['net']
+                
+                liste_postes.append(poste_dict)
     
     # Calculer les totaux généraux pour le bilan
-    total_actif_n = sum(p['montant_n'] for p in bilan_actif_complet)
-    total_actif_n1 = sum(p['montant_n1'] for p in bilan_actif_complet)
-    total_actif_n2 = sum(p['montant_n2'] for p in bilan_actif_complet)
+    total_actif_n = sum(p['montant_n'] for p in bilan_actif_complet if p['ref'] in ['AZ', 'BP', 'BT', 'BU'])
+    total_actif_n1 = sum(p['montant_n1'] for p in bilan_actif_complet if p['ref'] in ['AZ', 'BP', 'BT', 'BU'])
+    total_actif_n2 = sum(p['montant_n2'] for p in bilan_actif_complet if p['ref'] in ['AZ', 'BP', 'BT', 'BU'])
+    
+    total_actif_brut = sum(p.get('brut', 0) for p in bilan_actif_complet if p['ref'] in ['AZ', 'BP', 'BT', 'BU'])
+    total_actif_amort = sum(p.get('amort_deprec', 0) for p in bilan_actif_complet if p['ref'] in ['AZ'])
     
     bilan_actif_complet.append({
-        'ref': 'DZ',
+        'ref': 'BZ',  # BZ = TOTAL GENERAL ACTIF
         'libelle': 'TOTAL GÉNÉRAL ACTIF',
         'note': '',
+        'brut': total_actif_brut,
+        'amort_deprec': total_actif_amort,
+        'net': total_actif_n,
         'montant_n': total_actif_n,
         'montant_n1': total_actif_n1,
         'montant_n2': total_actif_n2
@@ -275,9 +293,12 @@ def generate_section_html_liasse(
     """
     Génère le HTML pour une section au format liasse officielle.
     Affiche TOUS les postes avec 2 colonnes de montants (N et N-1 seulement).
+    Si Bilan Actif, affiche BRUT, AMORT ET DEPREC, NET N, NET N-1.
     """
     if not postes:
         return ''
+    
+    is_actif = (section_id == 'bilan_actif')
     
     html = f"""
     <div class="etats-fin-section" data-section="{section_id}">
@@ -292,8 +313,21 @@ def generate_section_html_liasse(
                         <th style="width: 60px;">REF</th>
                         <th style="width: auto;">LIBELLÉS</th>
                         <th style="width: 60px;">NOTE</th>
+    """
+    if is_actif:
+        html += f"""
+                        <th style="width: 120px; text-align: right;">BRUT</th>
+                        <th style="width: 120px; text-align: right;">AMORT/DEPREC</th>
+                        <th style="width: 120px; text-align: right;">NET N</th>
+                        <th style="width: 120px; text-align: right;">NET N-1</th>
+        """
+    else:
+        html += f"""
                         <th style="width: 150px; text-align: right;">{exercice_n_label}</th>
                         <th style="width: 150px; text-align: right;">{exercice_n1_label}</th>
+        """
+        
+    html += """
                     </tr>
                 </thead>
                 <tbody>
@@ -305,9 +339,11 @@ def generate_section_html_liasse(
         note = poste.get('note', '')
         montant_n = poste.get('montant_n', 0)
         montant_n1 = poste.get('montant_n1', 0)
+        brut = poste.get('brut', 0)
+        amort_deprec = poste.get('amort_deprec', 0)
         
         # Déterminer si c'est un poste de totalisation
-        is_total = ref.startswith('X') or ref == 'DZ' or libelle.isupper() or 'TOTAL' in libelle.upper()
+        is_total = ref.startswith('X') or ref in ['DZ', 'BZ', 'TZ', 'UZ', 'VZ'] or libelle.isupper() or 'TOTAL' in libelle.upper()
         row_class = 'total-row' if is_total else ''
         
         html += f"""
@@ -315,8 +351,22 @@ def generate_section_html_liasse(
                         <td class="ref-cell">{ref}</td>
                         <td class="libelle-cell">{libelle}</td>
                         <td class="note-cell">{note}</td>
+        """
+        
+        if is_actif:
+            html += f"""
+                        <td class="montant-cell">{format_montant_liasse(brut)}</td>
+                        <td class="montant-cell" style="color: #d97706;">{format_montant_liasse(amort_deprec)}</td>
                         <td class="montant-cell">{format_montant_liasse(montant_n)}</td>
-                        <td class="montant-cell">{format_montant_liasse(montant_n1)}</td>
+                        <td class="montant-cell" style="color: #6b7280;">{format_montant_liasse(montant_n1)}</td>
+            """
+        else:
+            html += f"""
+                        <td class="montant-cell">{format_montant_liasse(montant_n)}</td>
+                        <td class="montant-cell" style="color: #6b7280;">{format_montant_liasse(montant_n1)}</td>
+            """
+            
+        html += """
                     </tr>
         """
     

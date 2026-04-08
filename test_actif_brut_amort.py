@@ -1,216 +1,168 @@
+# -*- coding: utf-8 -*-
 """
-Script de test pour le calcul des colonnes BRUT, AMORT ET DEPREC, NET de l'ACTIF
-
-Date: 07 Avril 2026
+Script de test pour le calcul BRUT / AMORTISSEMENT / NET de l'actif
 """
-
 import sys
-import os
-import pandas as pd
-import json
+sys.path.insert(0, 'py_backend')
 
-# Ajouter le chemin du backend
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'py_backend'))
+from calculer_actif_brut_amort import calculer_actif_brut_amort_complet
+import logging
 
-from calculer_actif_brut_amort import (
-    calculer_actif_avec_brut_amort,
-    generer_html_actif_detaille,
-    enrichir_actif_avec_brut_amort
-)
+logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
 
-
-def charger_balance_demo():
-    """Charge la balance de démonstration"""
-    # Chercher d'abord dans py_backend
-    balance_file = "py_backend/P000 -BALANCE DEMO N_N-1_N-2.xls"
+# Balance de test avec des données réalistes
+balance_test_n = [
+    # Immobilisations incorporelles
+    {'numero_compte': '211000', 'libelle': 'Frais de R&D', 'solde_debit': 1000000, 'solde_credit': 0, 'solde_net': 1000000},
+    {'numero_compte': '281100', 'libelle': 'Amort. Frais R&D', 'solde_debit': 0, 'solde_credit': 200000, 'solde_net': -200000},
     
-    if not os.path.exists(balance_file):
-        # Essayer dans le répertoire courant
-        balance_file = "P000 -BALANCE DEMO N_N-1_N-2.xls"
-        if not os.path.exists(balance_file):
-            print(f"❌ Fichier non trouvé: {balance_file}")
-            print(f"   Cherché dans: py_backend/ et répertoire courant")
-            return None
+    {'numero_compte': '212000', 'libelle': 'Brevets', 'solde_debit': 500000, 'solde_credit': 0, 'solde_net': 500000},
+    {'numero_compte': '281200', 'libelle': 'Amort. Brevets', 'solde_debit': 0, 'solde_credit': 100000, 'solde_net': -100000},
     
-    try:
-        # Lire l'onglet BALANCE N (avec espace à la fin)
-        df = pd.read_excel(balance_file, sheet_name="BALANCE N ")
-        print(f"✅ Balance chargée: {len(df)} lignes")
-        print(f"   Colonnes: {df.columns.tolist()}")
-        return df
-    except Exception as e:
-        print(f"❌ Erreur lors du chargement: {e}")
-        return None
+    # Immobilisations corporelles
+    {'numero_compte': '221000', 'libelle': 'Terrains', 'solde_debit': 5000000, 'solde_credit': 0, 'solde_net': 5000000},
+    
+    {'numero_compte': '231000', 'libelle': 'Bâtiments', 'solde_debit': 10000000, 'solde_credit': 0, 'solde_net': 10000000},
+    {'numero_compte': '283100', 'libelle': 'Amort. Bâtiments', 'solde_debit': 0, 'solde_credit': 2000000, 'solde_net': -2000000},
+    
+    {'numero_compte': '241000', 'libelle': 'Matériel', 'solde_debit': 3000000, 'solde_credit': 0, 'solde_net': 3000000},
+    {'numero_compte': '284100', 'libelle': 'Amort. Matériel', 'solde_debit': 0, 'solde_credit': 900000, 'solde_net': -900000},
+    
+    {'numero_compte': '245000', 'libelle': 'Matériel de transport', 'solde_debit': 2000000, 'solde_credit': 0, 'solde_net': 2000000},
+    {'numero_compte': '284500', 'libelle': 'Amort. Mat. transport', 'solde_debit': 0, 'solde_credit': 800000, 'solde_net': -800000},
+    
+    # Stocks
+    {'numero_compte': '311000', 'libelle': 'Marchandises', 'solde_debit': 1500000, 'solde_credit': 0, 'solde_net': 1500000},
+    {'numero_compte': '321000', 'libelle': 'Matières premières', 'solde_debit': 800000, 'solde_credit': 0, 'solde_net': 800000},
+    
+    # Créances
+    {'numero_compte': '411000', 'libelle': 'Clients', 'solde_debit': 4000000, 'solde_credit': 0, 'solde_net': 4000000},
+    
+    # Trésorerie
+    {'numero_compte': '521000', 'libelle': 'Banque', 'solde_debit': 2500000, 'solde_credit': 0, 'solde_net': 2500000},
+    {'numero_compte': '571000', 'libelle': 'Caisse', 'solde_debit': 500000, 'solde_credit': 0, 'solde_net': 500000},
+]
 
+balance_test_n1 = [
+    # Immobilisations incorporelles
+    {'numero_compte': '211000', 'libelle': 'Frais de R&D', 'solde_debit': 1000000, 'solde_credit': 0, 'solde_net': 1000000},
+    {'numero_compte': '281100', 'libelle': 'Amort. Frais R&D', 'solde_debit': 0, 'solde_credit': 100000, 'solde_net': -100000},
+    
+    {'numero_compte': '212000', 'libelle': 'Brevets', 'solde_debit': 500000, 'solde_credit': 0, 'solde_net': 500000},
+    {'numero_compte': '281200', 'libelle': 'Amort. Brevets', 'solde_debit': 0, 'solde_credit': 50000, 'solde_net': -50000},
+    
+    # Immobilisations corporelles
+    {'numero_compte': '221000', 'libelle': 'Terrains', 'solde_debit': 5000000, 'solde_credit': 0, 'solde_net': 5000000},
+    
+    {'numero_compte': '231000', 'libelle': 'Bâtiments', 'solde_debit': 10000000, 'solde_credit': 0, 'solde_net': 10000000},
+    {'numero_compte': '283100', 'libelle': 'Amort. Bâtiments', 'solde_debit': 0, 'solde_credit': 1500000, 'solde_net': -1500000},
+    
+    {'numero_compte': '241000', 'libelle': 'Matériel', 'solde_debit': 2500000, 'solde_credit': 0, 'solde_net': 2500000},
+    {'numero_compte': '284100', 'libelle': 'Amort. Matériel', 'solde_debit': 0, 'solde_credit': 600000, 'solde_net': -600000},
+    
+    {'numero_compte': '245000', 'libelle': 'Matériel de transport', 'solde_debit': 1500000, 'solde_credit': 0, 'solde_net': 1500000},
+    {'numero_compte': '284500', 'libelle': 'Amort. Mat. transport', 'solde_debit': 0, 'solde_credit': 500000, 'solde_net': -500000},
+    
+    # Stocks
+    {'numero_compte': '311000', 'libelle': 'Marchandises', 'solde_debit': 1200000, 'solde_credit': 0, 'solde_net': 1200000},
+    {'numero_compte': '321000', 'libelle': 'Matières premières', 'solde_debit': 700000, 'solde_credit': 0, 'solde_net': 700000},
+    
+    # Créances
+    {'numero_compte': '411000', 'libelle': 'Clients', 'solde_debit': 3500000, 'solde_credit': 0, 'solde_net': 3500000},
+    
+    # Trésorerie
+    {'numero_compte': '521000', 'libelle': 'Banque', 'solde_debit': 2000000, 'solde_credit': 0, 'solde_net': 2000000},
+    {'numero_compte': '571000', 'libelle': 'Caisse', 'solde_debit': 400000, 'solde_credit': 0, 'solde_net': 400000},
+]
 
-def charger_correspondances():
-    """Charge le fichier de correspondances"""
-    corresp_file = "py_backend/correspondances_syscohada.json"
-    
-    if not os.path.exists(corresp_file):
-        print(f"❌ Fichier non trouvé: {corresp_file}")
-        return None
-    
-    try:
-        with open(corresp_file, 'r', encoding='utf-8') as f:
-            correspondances = json.load(f)
-        print(f"✅ Correspondances chargées:")
-        print(f"   - Bilan Actif: {len(correspondances['bilan_actif'])} postes")
-        return correspondances
-    except Exception as e:
-        print(f"❌ Erreur lors du chargement: {e}")
-        return None
+print("\n" + "="*100)
+print("TEST DU CALCUL BRUT / AMORTISSEMENT / NET DE L'ACTIF")
+print("="*100)
 
+# Calculer
+resultats = calculer_actif_brut_amort_complet(balance_test_n, balance_test_n1)
 
-def detecter_colonnes(df):
-    """Détecte les colonnes de la balance"""
-    columns = df.columns.tolist()
-    columns_lower = [str(c).lower().strip() for c in columns]
-    
-    mapping = {
-        'numero': None,
-        'intitule': None,
-        'solde_debit': None,
-        'solde_credit': None
-    }
-    
-    for idx, col in enumerate(columns_lower):
-        original_col = columns[idx]
+print("\n" + "="*100)
+print("RÉSULTATS - POSTES AVEC VALEURS")
+print("="*100)
+
+print(f"\n{'REF':<5} {'LIBELLÉ':<50} {'BRUT N':>15} {'AMORT N':>15} {'NET N':>15}")
+print("-" * 100)
+
+for poste in resultats['postes']:
+    if poste['net_n'] != 0 or poste['est_totalisation']:
+        ref = poste['ref']
+        libelle = poste['libelle'][:48]
+        brut_n = poste['brut_n']
+        amort_n = poste['amort_n']
+        net_n = poste['net_n']
         
-        if 'numéro' in col or 'numero' in col:
-            mapping['numero'] = original_col
+        # Mettre en évidence les totalisations
+        if poste['est_totalisation'] and net_n != 0:
+            print(f"{ref:<5} {libelle:<50} {brut_n:>15,.0f} {amort_n:>15,.0f} {net_n:>15,.0f} ⭐")
+        else:
+            print(f"{ref:<5} {libelle:<50} {brut_n:>15,.0f} {amort_n:>15,.0f} {net_n:>15,.0f}")
+
+print("\n" + "="*100)
+print("COMPARAISON N vs N-1")
+print("="*100)
+
+print(f"\n{'REF':<5} {'LIBELLÉ':<40} {'NET N':>15} {'NET N-1':>15} {'VARIATION':>15}")
+print("-" * 100)
+
+for poste in resultats['postes']:
+    if poste['net_n'] != 0 or poste['net_n1'] != 0:
+        ref = poste['ref']
+        libelle = poste['libelle'][:38]
+        net_n = poste['net_n']
+        net_n1 = poste['net_n1']
+        variation = net_n - net_n1
         
-        if 'intitulé' in col or 'intitule' in col:
-            mapping['intitule'] = original_col
-        
-        if 'solde' in col and 'débit' in col:
-            mapping['solde_debit'] = original_col
-        elif 'solde' in col and 'debit' in col:
-            mapping['solde_debit'] = original_col
-        
-        if 'solde' in col and 'crédit' in col:
-            mapping['solde_credit'] = original_col
-        elif 'solde' in col and 'credit' in col:
-            mapping['solde_credit'] = original_col
-    
-    print(f"✅ Colonnes détectées: {mapping}")
-    return mapping
+        print(f"{ref:<5} {libelle:<40} {net_n:>15,.0f} {net_n1:>15,.0f} {variation:>15,.0f}")
 
+print("\n" + "="*100)
+print("MÉTADONNÉES")
+print("="*100)
 
-def afficher_resultats(actif_detaille):
-    """Affiche les résultats du calcul"""
-    print("\n" + "="*80)
-    print("📊 RÉSULTATS DU CALCUL - ACTIF AVEC BRUT, AMORT, NET")
-    print("="*80)
-    
-    # Postes avec des valeurs
-    postes_avec_valeurs = {ref: data for ref, data in actif_detaille.items() 
-                           if data['brut'] > 0 or data['amort_deprec'] > 0}
-    
-    print(f"\n✅ {len(postes_avec_valeurs)} postes avec des valeurs\n")
-    
-    # Afficher les détails
-    for ref, data in sorted(postes_avec_valeurs.items()):
-        print(f"\n{ref} - {data['libelle']}")
-        print(f"   BRUT:           {data['brut']:>15,.0f}")
-        print(f"   AMORT ET DEPREC: {data['amort_deprec']:>15,.0f}")
-        print(f"   NET:            {data['net']:>15,.0f}")
-        
-        if data['comptes_brut']:
-            print(f"   Comptes bruts ({len(data['comptes_brut'])}):")
-            for compte in data['comptes_brut'][:3]:  # Afficher max 3 comptes
-                print(f"      - {compte['numero']}: {compte['montant']:,.0f}")
-        
-        if data['comptes_amort']:
-            print(f"   Comptes amort/prov ({len(data['comptes_amort'])}):")
-            for compte in data['comptes_amort'][:3]:
-                print(f"      - {compte['numero']}: {compte['montant']:,.0f}")
-    
-    # Afficher les totaux
-    print("\n" + "="*80)
-    print("📈 TOTAUX")
-    print("="*80)
-    
-    for ref in ['AZ', 'BP', 'BT', 'BZ']:
-        if ref in actif_detaille:
-            data = actif_detaille[ref]
-            print(f"\n{ref} - {data['libelle']}")
-            print(f"   BRUT:           {data['brut']:>15,.0f}")
-            print(f"   AMORT ET DEPREC: {data['amort_deprec']:>15,.0f}")
-            print(f"   NET:            {data['net']:>15,.0f}")
+metadata = resultats['metadata']
+print(f"\nNombre total de postes:        {metadata['nb_postes']}")
+print(f"Postes avec valeurs:           {metadata['nb_postes_avec_valeurs']}")
+print(f"\nTOTAL BRUT N:                  {metadata['total_brut_n']:>15,.0f}")
+print(f"TOTAL AMORTISSEMENT N:         {metadata['total_amort_n']:>15,.0f}")
+print(f"TOTAL NET N:                   {metadata['total_net_n']:>15,.0f}")
 
+print("\n" + "="*100)
+print("VÉRIFICATIONS")
+print("="*100)
 
-def sauvegarder_html(html, filename="test_actif_brut_amort.html"):
-    """Sauvegarde le HTML généré"""
-    try:
-        with open(filename, 'w', encoding='utf-8') as f:
-            f.write(html)
-        print(f"\n✅ HTML sauvegardé: {filename}")
-        
-        # Ouvrir dans le navigateur
-        import webbrowser
-        webbrowser.open(filename)
-        print(f"✅ Ouverture dans le navigateur...")
-    except Exception as e:
-        print(f"❌ Erreur lors de la sauvegarde: {e}")
+# Vérifier que NET = BRUT - AMORTISSEMENT
+erreurs = 0
+for poste in resultats['postes']:
+    if not poste['est_totalisation']:
+        net_calcule = poste['brut_n'] - poste['amort_n']
+        if abs(net_calcule - poste['net_n']) > 0.01:
+            print(f"❌ ERREUR {poste['ref']}: NET calculé ({net_calcule:,.0f}) ≠ NET stocké ({poste['net_n']:,.0f})")
+            erreurs += 1
 
+if erreurs == 0:
+    print("✅ Tous les calculs NET = BRUT - AMORTISSEMENT sont corrects")
+else:
+    print(f"❌ {erreurs} erreur(s) détectée(s)")
 
-def main():
-    """Fonction principale de test"""
-    print("="*80)
-    print("🧪 TEST - Calcul ACTIF avec BRUT, AMORT ET DEPREC, NET")
-    print("="*80)
-    
-    # 1. Charger la balance
-    print("\n1️⃣ Chargement de la balance...")
-    balance_df = charger_balance_demo()
-    if balance_df is None:
-        return
-    
-    # 2. Charger les correspondances
-    print("\n2️⃣ Chargement des correspondances...")
-    correspondances = charger_correspondances()
-    if correspondances is None:
-        return
-    
-    # 3. Détecter les colonnes
-    print("\n3️⃣ Détection des colonnes...")
-    col_map = detecter_colonnes(balance_df)
-    
-    # 4. Calculer l'actif détaillé
-    print("\n4️⃣ Calcul de l'actif détaillé...")
-    try:
-        actif_detaille = calculer_actif_avec_brut_amort(balance_df, correspondances, col_map)
-        print("✅ Calcul terminé")
-    except Exception as e:
-        print(f"❌ Erreur lors du calcul: {e}")
-        import traceback
-        traceback.print_exc()
-        return
-    
-    # 5. Afficher les résultats
-    print("\n5️⃣ Affichage des résultats...")
-    afficher_resultats(actif_detaille)
-    
-    # 6. Générer le HTML
-    print("\n6️⃣ Génération du HTML...")
-    try:
-        html = generer_html_actif_detaille(actif_detaille)
-        print("✅ HTML généré")
-    except Exception as e:
-        print(f"❌ Erreur lors de la génération HTML: {e}")
-        import traceback
-        traceback.print_exc()
-        return
-    
-    # 7. Sauvegarder et ouvrir
-    print("\n7️⃣ Sauvegarde du HTML...")
-    sauvegarder_html(html)
-    
-    print("\n" + "="*80)
-    print("✅ TEST TERMINÉ AVEC SUCCÈS")
-    print("="*80)
+# Vérifier les totalisations
+print("\n📊 Vérification des totalisations:")
 
+postes_dict = {p['ref']: p for p in resultats['postes']}
 
-if __name__ == "__main__":
-    main()
+# AZ: TOTAL ACTIF IMMOBILISÉ
+refs_immobilise = ['AB', 'AC', 'AE', 'AF', 'AG', 'AH', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AP', 'AR', 'AS']
+total_immobilise_calcule = sum(postes_dict.get(ref, {}).get('net_n', 0) for ref in refs_immobilise)
+total_immobilise_stocke = postes_dict.get('AZ', {}).get('net_n', 0)
+if abs(total_immobilise_calcule - total_immobilise_stocke) < 0.01:
+    print(f"✅ AZ (TOTAL ACTIF IMMOBILISÉ): {total_immobilise_stocke:,.0f}")
+else:
+    print(f"❌ AZ: Calculé ({total_immobilise_calcule:,.0f}) ≠ Stocké ({total_immobilise_stocke:,.0f})")
+
+print("\n" + "="*100)
+print("TEST TERMINÉ")
+print("="*100)
