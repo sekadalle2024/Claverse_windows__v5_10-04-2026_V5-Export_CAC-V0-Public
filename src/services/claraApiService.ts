@@ -38,6 +38,7 @@ export class ClaraApiService {
   private readonly SENTINEL_NOTIFICATION = "__INTERNAL__NOTIFICATION__";
   private readonly SENTINEL_LEAD_BALANCE = "__INTERNAL__LEAD_BALANCE__";
   private readonly SENTINEL_ETAT_FIN = "__INTERNAL__ETAT_FIN__";
+  private readonly SENTINEL_TEMPLATE_TABLE = "__INTERNAL__TEMPLATE_TABLE__";
 
   /**
    * Router n8n – Switch-case JavaScript avec informations de routing
@@ -142,6 +143,36 @@ export class ClaraApiService {
     } else if (msg.includes("Etat fin")) {
       routeKey = "etat_fin";
       caseName = "Case 24";
+    }
+    
+    // Cases 35-43: Templates de tables (génération locale)
+    else if (msg.includes("Template_table_unicolonne")) {
+      routeKey = "template_table_unicolonne";
+      caseName = "Case 35";
+    } else if (msg.includes("Template_table_simple")) {
+      routeKey = "template_table_simple";
+      caseName = "Case 36";
+    } else if (msg.includes("Template_table_etape_de_mission")) {
+      routeKey = "template_table_etape_de_mission";
+      caseName = "Case 37";
+    } else if (msg.includes("Template_table_feuille_couverture_test_audit")) {
+      routeKey = "template_table_feuille_couverture_test_audit";
+      caseName = "Case 38";
+    } else if (msg.includes("Template_table_frap")) {
+      routeKey = "template_table_frap";
+      caseName = "Case 39";
+    } else if (msg.includes("Template_table_synthèses_frap")) {
+      routeKey = "template_table_syntheses_frap";
+      caseName = "Case 40";
+    } else if (msg.includes("Template_table_rapport_provisoire")) {
+      routeKey = "template_table_rapport_provisoire";
+      caseName = "Case 41";
+    } else if (msg.includes("Template_table_rapport_final")) {
+      routeKey = "template_table_rapport_final";
+      caseName = "Case 42";
+    } else if (msg.includes("Template_table_suivi_recos")) {
+      routeKey = "template_table_suivi_recos";
+      caseName = "Case 43";
     }
     
     // Cases 2-10: Autres fonctionnalités spécifiques
@@ -265,6 +296,16 @@ export class ClaraApiService {
         return "https://t22wtwxl.rpcld.app/webhook/methodo_revision";
       case "heatmap_risque":
         return "https://t22wtwxl.rpcld.app/webhook/heatmap_risque";
+      case "template_table_unicolonne":
+      case "template_table_simple":
+      case "template_table_etape_de_mission":
+      case "template_table_feuille_couverture_test_audit":
+      case "template_table_frap":
+      case "template_table_syntheses_frap":
+      case "template_table_rapport_provisoire":
+      case "template_table_rapport_final":
+      case "template_table_suivi_recos":
+        return this.SENTINEL_TEMPLATE_TABLE;
       case "default":
       default:
         return this.n8nDefaultEndpoint;
@@ -772,6 +813,8 @@ export class ClaraApiService {
           cleanValue = cleanValue.substring(0, 197) + "...";
         }
 
+        // CORRECTION FUSION CELLULES: Utiliser un tiret pour les cellules vides
+        // au lieu d'un espace qui peut être ignoré par le rendu Markdown
         return cleanValue || "-";
       });
 
@@ -843,6 +886,271 @@ export class ClaraApiService {
     }
 
     return md;
+  }
+
+  /**
+   * Génère les templates de tables pour les cases 35-43
+   */
+  private generateTemplateTable(routeKey: string, userMessage: string): string {
+    console.log(`🎨 Génération du template: ${routeKey}`);
+    
+    // Définir les templates JSON selon le routeKey
+    const templates: { [key: string]: any } = {
+      template_table_unicolonne: {
+        "Etape mission - Flowise": [
+          {
+            "table 1": [
+              {
+                "Table_unicolonne": ""
+              }
+            ]
+          }
+        ]
+      },
+      
+      template_table_simple: {
+        "Etape mission - audit": [
+          {
+            "table 1": Array.from({ length: 10 }, (_, i) => ({
+              "No": i + 1,
+              "Colonne A": "",
+              "Colonne B": "",
+              "Colonne C": "",
+              "Colonne D": "",
+              "Colonne E": ""
+            }))
+          }
+        ]
+      },
+      
+      template_table_etape_de_mission: {
+        "Etape mission - preparation": [
+          {
+            "table 1": {
+              "Etape de mission": "",
+              "Norme": " ",
+              "Méthode": "",
+              "Reference": "Etape-001"
+            }
+          },
+          {
+            "table 2": Array.from({ length: 10 }, (_, i) => ({
+              "No": i + 1,
+              "Colonne A": "",
+              "Colonne B": "",
+              "Colonne C": "",
+              "Colonne D": "",
+              "Colonne E": ""
+            }))
+          }
+        ]
+      },
+      
+      template_table_feuille_couverture_test_audit: {
+        "Etape mission - Feuille couverture": [
+          {
+            "table 1": {
+              "Etape de mission": "Feuille couverture",
+              "Norme": " ",
+              "Méthode": "",
+              "Reference": "Feuille couverture-001"
+            }
+          },
+          {
+            "table 2": {
+              "OBJECTIFS": ""
+            }
+          },
+          {
+            "table 3": {
+              "1": "",
+              "2": " ",
+              "3": "",
+              "4": ""
+            }
+          },
+          {
+            "table 4": {
+              "Résultats des tests": ""
+            }
+          },
+          {
+            "table 5": Array.from({ length: 10 }, (_, i) => ({
+              "No": "",
+              "domaines ": "",
+              "Transaction": "",
+              "Solde Théorique ": "",
+              "Solde Physique ": "",
+              "Ecart": "",
+              "Assertion": "",
+              "CTR1": "",
+              "CTR 2": "",
+              "CTR 3": "",
+              "Description": "",
+              "Conclusion": ""
+            }))
+          }
+        ]
+      },
+      
+      template_table_frap: {
+        "Etape mission - Frap": [
+          {
+            "table 1": {
+              "Etape de mission": "Frap",
+              "Norme": "14.3 Évaluation des constats",
+              "Méthode": "Méthode des constats d'audit par les risques critiques",
+              "Reference": "Frap-001"
+            }
+          },
+          {
+            "table 2": {
+              "Intitule": ""
+            }
+          },
+          {
+            "table 3": {
+              "Observation": ""
+            }
+          },
+          {
+            "table 4": {
+              "Constat": ""
+            }
+          },
+          {
+            "table 5": {
+              "Risque": ""
+            }
+          },
+          {
+            "table 6": {
+              "Recommendation": ""
+            }
+          }
+        ]
+      },
+      
+      template_table_syntheses_frap: {
+        "Etape mission - Synthèse": [
+          {
+            "table 1": {
+              "Etape de mission": "Synthèse",
+              "Norme": "",
+              "Méthode": "",
+              "Reference": "Synthèse-001"
+            }
+          },
+          {
+            "table 2": Array.from({ length: 10 }, (_, i) => ({
+              "no": i + 1,
+              "Intitule": "",
+              "Observation": "",
+              "Constat": "",
+              "Risque": "",
+              "Recommandation": ""
+            }))
+          }
+        ]
+      },
+      
+      template_table_rapport_provisoire: {
+        "Etape mission - Rapport provisoire": [
+          {
+            "table 1": {
+              "Etape de mission": "Rapport provisoire",
+              "Norme": " ",
+              "Méthode": "",
+              "Reference": "Rapport provisoire-001"
+            }
+          },
+          {
+            "table 2": Array.from({ length: 10 }, (_, i) => ({
+              "no": i + 1,
+              "Intitule": "",
+              "Observation": "",
+              "Constat": "",
+              "Risque": "",
+              "Recommandation": "",
+              "Commentaire audite": "",
+              "Commentaire auditeur": ""
+            }))
+          }
+        ]
+      },
+      
+      template_table_rapport_final: {
+        "Etape mission - Rapport final": [
+          {
+            "table 1": {
+              "Etape de mission": "Rapport final",
+              "Norme": " ",
+              "Méthode": "",
+              "Reference": "Rapport final-001"
+            }
+          },
+          {
+            "table 2": Array.from({ length: 10 }, (_, i) => ({
+              "no": i + 1,
+              "Intitule": "",
+              "Observation": "",
+              "Constat": "",
+              "Risque": "",
+              "Recommandation": "",
+              "Commentaire audite": "",
+              "Commentaire auditeur": "",
+              "Plan action": "",
+              "Responsable": "",
+              "Delai": ""
+            }))
+          }
+        ]
+      },
+      
+      template_table_suivi_recos: {
+        "Etape mission - Suivis des recos": [
+          {
+            "table 1": {
+              "Etape de mission": "Suivis des recos",
+              "Norme": " ",
+              "Méthode": "",
+              "Reference": "Suivis des recos-001"
+            }
+          },
+          {
+            "table 2": Array.from({ length: 10 }, (_, i) => ({
+              "no": i + 1,
+              "Intitule": "",
+              "Observation": "",
+              "Constat": "",
+              "Risque": "",
+              "Recommandation": "",
+              "Commentaire audite": "",
+              "Commentaire auditeur": "",
+              "Plan action": "",
+              "Responsable": "",
+              "Delai": "",
+              "Evaluation Risque": ""
+            }))
+          }
+        ]
+      }
+    };
+    
+    // Récupérer le template correspondant
+    const templateData = templates[routeKey];
+    
+    if (!templateData) {
+      console.error(`❌ Template non trouvé pour: ${routeKey}`);
+      return `**Erreur**: Template non trouvé pour ${routeKey}`;
+    }
+    
+    // Convertir le template JSON en Markdown en utilisant la méthode existante
+    const markdownContent = this.convertStructuredDataToMarkdown(templateData);
+    
+    console.log(`✅ Template généré avec succès (${markdownContent.length} caractères)`);
+    
+    return markdownContent;
   }
 
   /**
@@ -1591,6 +1899,23 @@ export class ClaraApiService {
           id: `${Date.now()}-etat-fin`,
           role: "assistant",
           content: initialContent,
+          timestamp: new Date(),
+          metadata: { 
+            model: "local"
+          },
+        };
+      }
+
+      // ── Cases 35-43 : Templates de tables – Génération locale ──────
+      if (resolvedEndpoint === this.SENTINEL_TEMPLATE_TABLE) {
+        console.log(`📋 [Template Table] Génération du template - ${routingInfo.caseName}`);
+        
+        const templateContent = this.generateTemplateTable(routingInfo.routeKey, message);
+        
+        return {
+          id: `${Date.now()}-template-table`,
+          role: "assistant",
+          content: templateContent,
           timestamp: new Date(),
           metadata: { 
             model: "local"
