@@ -157,17 +157,26 @@ class BalanceReader:
         Returns:
             DataFrame de la balance chargée et nettoyée
         """
-        # Charger l'onglet
-        df = pd.read_excel(self.fichier_balance, sheet_name=sheet_name)
-        
-        # Nettoyer les colonnes
-        df = self.nettoyer_colonnes(df)
-        
-        # Convertir les montants
-        df = self.convertir_montants(df)
-        
-        logger.info(f"✓ Balance {exercice} chargée: {len(df)} lignes")
-        return df
+        try:
+            # Charger l'onglet
+            df = pd.read_excel(self.fichier_balance, sheet_name=sheet_name)
+            logger.info(f"Onglet {exercice} chargé: {len(df)} lignes brutes")
+            
+            # Nettoyer les colonnes
+            df = self.nettoyer_colonnes(df)
+            logger.info(f"Colonnes nettoyées pour {exercice}")
+            
+            # Convertir les montants
+            df = self.convertir_montants(df)
+            logger.info(f"Montants convertis pour {exercice}")
+            
+            logger.info(f"✓ Balance {exercice} chargée: {len(df)} lignes")
+            return df
+        except Exception as e:
+            logger.error(f"Erreur lors du chargement de la balance {exercice}: {str(e)}")
+            import traceback
+            logger.error(traceback.format_exc())
+            raise
     
     def nettoyer_colonnes(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -178,6 +187,7 @@ class BalanceReader:
         2. Remplace les espaces multiples par un seul espace
         3. Normalise les variations de noms de colonnes
         4. Calcule les colonnes Débit et Crédit si manquantes
+        5. Gère les colonnes dupliquées
         
         Args:
             df: DataFrame à nettoyer
@@ -186,11 +196,11 @@ class BalanceReader:
             DataFrame avec colonnes nettoyées
         """
         # Nettoyer les noms de colonnes
-        df.columns = df.columns.str.strip()
-        df.columns = df.columns.str.replace(r'\s+', ' ', regex=True)
+        df.columns = [str(col).strip() for col in df.columns]
+        df.columns = [re.sub(r'\s+', ' ', col) for col in df.columns]
         
         # Supprimer les colonnes Unnamed
-        df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        df = df.loc[:, ~pd.Series(df.columns).str.contains('^Unnamed', na=False).values]
         
         # Mapping des variations de noms de colonnes
         column_mapping = {
@@ -213,6 +223,13 @@ class BalanceReader:
         
         # Appliquer le mapping
         df.columns = [column_mapping.get(col, col) for col in df.columns]
+        
+        # Gérer les colonnes dupliquées en gardant seulement la première occurrence
+        if df.columns.duplicated().any():
+            logger.warning(f"Colonnes dupliquées détectées: {df.columns[df.columns.duplicated()].tolist()}")
+            # Garder seulement les colonnes uniques (première occurrence)
+            df = df.loc[:, ~df.columns.duplicated(keep='first')]
+            logger.info(f"Colonnes après suppression des doublons: {list(df.columns)}")
         
         # Vérifier que les colonnes minimales sont présentes
         colonnes_manquantes = [col for col in self.colonnes_minimales if col not in df.columns]
@@ -243,6 +260,7 @@ class BalanceReader:
         2. Remplace les valeurs vides ou invalides par 0.0
         3. Gère les séparateurs décimaux (virgule et point)
         4. Gère les séparateurs de milliers
+        5. Remplace les valeurs infinies par 0.0
         
         Args:
             df: DataFrame à convertir
@@ -258,15 +276,14 @@ class BalanceReader:
         
         for col in colonnes_montants:
             if col in df.columns:
-                # Convertir en string pour traiter les formats
-                df[col] = df[col].astype(str)
+                # Convertir la colonne en string, nettoyer, puis convertir en float
+                temp_series = df[col].astype(str)
+                temp_series = temp_series.str.replace(' ', '', regex=False)
+                temp_series = temp_series.str.replace(',', '.', regex=False)
+                df[col] = pd.to_numeric(temp_series, errors='coerce').fillna(0.0)
                 
-                # Supprimer les espaces et séparateurs de milliers
-                df[col] = df[col].str.replace(' ', '', regex=False)
-                df[col] = df[col].str.replace(',', '.', regex=False)  # Virgule -> point décimal
-                
-                # Convertir en float, remplacer les erreurs par 0.0
-                df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
+                # Remplacer les valeurs infinies par 0.0
+                df[col] = df[col].replace([float('inf'), float('-inf')], 0.0)
         
         # Convertir la colonne Numéro en string
         if 'Numéro' in df.columns:

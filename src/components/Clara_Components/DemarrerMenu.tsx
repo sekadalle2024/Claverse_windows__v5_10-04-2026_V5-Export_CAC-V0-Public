@@ -153,6 +153,34 @@ const MENU_DATA: LogicielItem[] = [
 [Nb de lignes] = 30`
               },
               {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Cartographie des risques
+[Etape de mission] = Collecte documentaire
+[Modele] : Processus, document, Direction, operationnel
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Document
+[Nb de lignes] = 30`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Cartographie des risques
+[Etape de mission] = Collecte documentaire
+[Modele] : Processus, document, Direction, operationnel
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02
+[Nb de lignes] = 30`
+              },
+              {
                 id: 'methodo',
                 label: 'Methodo audit',
                 command: `[Command] = Etape de mission
@@ -205,6 +233,34 @@ const MENU_DATA: LogicielItem[] = [
 [Modele] : Processus, sous processus, Questionnaire de prise de connaissance
 [Variable 1] = Contenu de [Variable 1]
 [Variable 2] = Contenu de [Variable 2]
+[Nb de lignes] = 30`
+              },
+              {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Collecte documentaire
+[Etape de mission] = Questionnaire prise de connaissance
+[Modele] : Processus, sous processus, Questionnaire de prise de connaissance
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Document
+[Nb de lignes] = 30`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Collecte documentaire
+[Etape de mission] = Questionnaire prise de connaissance
+[Modele] : Processus, sous processus, Questionnaire de prise de connaissance
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02
 [Nb de lignes] = 30`
               },
               {
@@ -263,6 +319,34 @@ const MENU_DATA: LogicielItem[] = [
 [Nb de lignes] = 30`
               },
               {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Questionnaire prise de connaissance
+[Etape de mission] = Cartographie des processus
+[Modele] : Cycle, Processus, sous processus, operations
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Document
+[Nb de lignes] = 30`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Questionnaire prise de connaissance
+[Etape de mission] = Cartographie des processus
+[Modele] : Cycle, Processus, sous processus, operations
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02
+[Nb de lignes] = 30`
+              },
+              {
                 id: 'methodo',
                 label: 'Methodo audit',
                 command: `[Command] = Etape de mission
@@ -312,6 +396,34 @@ const MENU_DATA: LogicielItem[] = [
 [Integration] = integration_min
 [Variable 1] = Contenu de [Variable 1]
 [Variable 2] = Contenu de [Variable 2]
+[Nb de lignes] = 40`
+              },
+              {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = /Cartographie des risques
+[Processus] = Sécurité trésorerie
+[Modele] : operationnel, risque, évaluation risque, probabilité, impact, controle audit
+[Matrice de criticite] = Matrice numerique - 5 niveau
+[Integration] = integration_min
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Document
+[Nb de lignes] = 40`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = /Cartographie des risques
+[Processus] = Sécurité trésorerie
+[Modele] : operationnel, risque, évaluation risque, probabilité, impact, controle audit
+[Matrice de criticite] = Matrice numerique - 5 niveau
+[Integration] = integration_min
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02
 [Nb de lignes] = 40`
               },
               {
@@ -370,6 +482,34 @@ const MENU_DATA: LogicielItem[] = [
 [Nb de lignes] = 30`
               },
               {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Cartographie des risques
+[Etape de mission] = Referentiel de controle interne
+[Modele] : Processus, Tache clé, objectif de contrôle, risques, contrôles clé
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Document
+[Nb de lignes] = 30`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Cartographie des risques
+[Etape de mission] = Referentiel de controle interne
+[Modele] : Processus, Tache clé, objectif de contrôle, risques, contrôles clé
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02
+[Nb de lignes] = 30`
+              },
+              {
                 id: 'methodo',
                 label: 'Methodo audit',
                 command: `[Command] = Etape de mission
@@ -425,6 +565,34 @@ const MENU_DATA: LogicielItem[] = [
 [Nb de lignes] = 30`
               },
               {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Referentiel de controle interne
+[Etape de mission] = Rapport d'orientation
+[Modele] : Processus, Objectifs generaux de contrôle interne, Objectifs spécifiques
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Document
+[Nb de lignes] = 30`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = Etape de mission
+[Processus] = rapprochements bancaires
+[Etape précédente] = Referentiel de controle interne
+[Etape de mission] = Rapport d'orientation
+[Modele] : Processus, Objectifs generaux de contrôle interne, Objectifs spécifiques
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02
+[Nb de lignes] = 30`
+              },
+              {
                 id: 'methodo',
                 label: 'Methodo audit',
                 command: `[Command] = Etape de mission
@@ -475,6 +643,36 @@ const MENU_DATA: LogicielItem[] = [
 [Directive] = Cibler uniquement les operations d'inventaire de caisse en priorite
 [Variable 1] = Contenu de [Variable 1]
 [Variable 2] = Contenu de [Variable 2]
+[Nb de lignes] = 20`
+              },
+              {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = Programme de travail
+[Processus] = inventaire de caisse
+[Modele] : Point de controle, Risque, assertion, anomalie courantes, document
+[Extension] = objectif de controle, document
+[Integration] = integration_min
+[Directive] = Cibler uniquement les operations d'inventaire de caisse en priorite
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Document
+[Nb de lignes] = 20`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = Programme de travail
+[Processus] = inventaire de caisse
+[Modele] : Point de controle, Risque, assertion, anomalie courantes, document
+[Extension] = objectif de controle, document
+[Integration] = integration_min
+[Directive] = Cibler uniquement les operations d'inventaire de caisse en priorite
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02
 [Nb de lignes] = 20`
               },
               {
@@ -558,6 +756,32 @@ const MENU_DATA: LogicielItem[] = [
 [Variable 2] = Contenu de [Variable 2]`
               },
               {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = /Frap
+[Processus] = Elaboration des rapprochement bancaires
+[Assertion] = validité, formalisation
+[Anomalie] = les rapprochements bancaire ne sont pas verifié par le DAF
+[Constat] = inexistence de rapprochement bancaires signés pour les mois de juin a decembre 2025
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Document`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = /Frap
+[Processus] = Elaboration des rapprochement bancaires
+[Assertion] = validité, formalisation
+[Anomalie] = les rapprochements bancaire ne sont pas verifié par le DAF
+[Constat] = inexistence de rapprochement bancaires signés pour les mois de juin a decembre 2025
+[Variable 1] = Contenu de [Variable 1]
+[Variable 2] = Contenu de [Variable 2]
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02`
+              },
+              {
                 id: 'methodo',
                 label: 'Methodo audit',
                 command: `[Command] = /Frap
@@ -606,6 +830,30 @@ const MENU_DATA: LogicielItem[] = [
 [Pièces jointes] = Frap de la mission`
               },
               {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = /Table synthese
+[Command Manuel] = Étape mission
+[Étape précédente] = Frap
+[Étape mission] = Synthèse des Frap
+[Modèle] = 
+[Pièces jointes] = Frap de la mission
+[Router] = Document`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = /Table synthese
+[Command Manuel] = Étape mission
+[Étape précédente] = Frap
+[Étape mission] = Synthèse des Frap
+[Modèle] = 
+[Pièces jointes] = Frap de la mission
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02`
+              },
+              {
                 id: 'methodo',
                 label: 'Methodo audit',
                 command: `[Command] = /Table synthese
@@ -650,6 +898,30 @@ const MENU_DATA: LogicielItem[] = [
 [Étape mission] = Rapport provisoire
 [Modèle] = 
 [Pièces jointes] = Synthèse des Frap`
+              },
+              {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = /Table rapport_provisoire
+[Command Manuel] = Étape mission
+[Étape précédente] = Synthèse des Frap
+[Étape mission] = Rapport provisoire
+[Modèle] = 
+[Pièces jointes] = Synthèse des Frap
+[Router] = Document`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = /Table rapport_provisoire
+[Command Manuel] = Étape mission
+[Étape précédente] = Synthèse des Frap
+[Étape mission] = Rapport provisoire
+[Modèle] = 
+[Pièces jointes] = Synthèse des Frap
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02`
               },
               {
                 id: 'methodo',
@@ -707,6 +979,30 @@ const MENU_DATA: LogicielItem[] = [
 [Pièces jointes] = Rapport provisoire`
               },
               {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = /Table rapport_final
+[Command Manuel] = Étape mission
+[Étape précédente] = Rapport provisoire
+[Étape mission] = Rapport final
+[Modèle] = 
+[Pièces jointes] = Rapport provisoire
+[Router] = Document`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = /Table rapport_final
+[Command Manuel] = Étape mission
+[Étape précédente] = Rapport provisoire
+[Étape mission] = Rapport final
+[Modèle] = 
+[Pièces jointes] = Rapport provisoire
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02`
+              },
+              {
                 id: 'methodo',
                 label: 'Methodo audit',
                 command: `[Command] = /Table rapport_final
@@ -751,6 +1047,30 @@ const MENU_DATA: LogicielItem[] = [
 [Étape mission] = Suivi des recos
 [Modèle] = 
 [Pièces jointes] = Rapport final`
+              },
+              {
+                id: 'document',
+                label: 'Mode Document',
+                command: `[Command] = /Table suivi_recos
+[Command Manuel] = Étape mission
+[Étape précédente] = Rapport final
+[Étape mission] = Suivi des recos
+[Modèle] = 
+[Pièces jointes] = Rapport final
+[Router] = Document`
+              },
+              {
+                id: 'database',
+                label: 'Mode Database',
+                command: `[Command] = /Table suivi_recos
+[Command Manuel] = Étape mission
+[Étape précédente] = Rapport final
+[Étape mission] = Suivi des recos
+[Modèle] = 
+[Pièces jointes] = Rapport final
+[Router] = Database
+[User_id] = ohada
+[Database] = workspace_02`
               },
               {
                 id: 'methodo',

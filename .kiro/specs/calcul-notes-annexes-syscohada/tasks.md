@@ -13,8 +13,8 @@ This implementation plan creates a modular Python system to automate the calcula
   - Set up logging configuration (calcul_notes_annexes.log, calcul_notes_warnings.log, calcul_notes_errors.log)
   - _Requirements: 11.1, 11.2, 12.2_
 
-- [-] 2. Implement Balance_Reader module
-  - [-] 2.1 Create balance_reader.py with BalanceReader class
+- [x] 2. Implement Balance_Reader module
+  - [x] 2.1 Create balance_reader.py with BalanceReader class
     - Implement __init__(fichier_balance: str) method
     - Implement charger_balances() method to load 3 balance sheets (N, N-1, N-2)
     - Implement detecter_onglets() method for automatic worksheet detection
@@ -23,15 +23,15 @@ This implementation plan creates a modular Python system to automate the calcula
     - Define custom exceptions: BalanceNotFoundException, InvalidBalanceFormatException
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7_
 
-  - [ ]* 2.2 Write property test for Balance_Reader
+  - [x] 2.2 Write property test for Balance_Reader
     - **Property 1: Balance Loading Completeness**
     - **Validates: Requirements 1.1, 1.2**
 
-  - [ ]* 2.3 Write property test for column normalization
+  - [x] 2.3 Write property test for column normalization
     - **Property 2: Column Name Normalization**
     - **Validates: Requirements 1.4**
 
-  - [ ]* 2.4 Write property test for numeric conversion robustness
+  - [-] 2.4 Write property test for numeric conversion robustness
     - **Property 3: Numeric Conversion Robustness**
     - **Validates: Requirements 1.5, 1.6**
 
